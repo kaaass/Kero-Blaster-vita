@@ -1,0 +1,11 @@
+build/*
+*.velf
+*.elf
+*.vpk
+*.sfo
+*.bin
+*.out
+*.o
+cmake-*
+.idea
+work
