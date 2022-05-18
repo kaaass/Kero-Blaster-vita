@@ -61,17 +61,17 @@ void hook_addr(uintptr_t addr, uintptr_t dst) {
 void so_flush_caches(so_module *mod) {
   kuKernelFlushCaches((void *)mod->text_base, mod->text_size);
 }
-#define debug_flag debugPrintf("%s:%d\n", __FILE__, __LINE__);
+
 int so_load(so_module *mod, const char *filename, uintptr_t load_addr) {
-debug_flag  int res = 0;
-debug_flag  uintptr_t data_addr = 0;
-debug_flag  SceUID so_blockid;
-debug_flag  void *so_data;
-debug_flag  size_t so_size;
-debug_flag
-debug_flag  memset(mod, 0, sizeof(so_module));
-debug_flag
-debug_flag  SceUID fd = sceIoOpen(filename, SCE_O_RDONLY, 0);
+  int res = 0;
+  uintptr_t data_addr = 0;
+  SceUID so_blockid;
+  void *so_data;
+  size_t so_size;
+
+  memset(mod, 0, sizeof(so_module));
+
+  SceUID fd = sceIoOpen(filename, SCE_O_RDONLY, 0);
   if (fd < 0)
     return fd;
 
@@ -145,6 +145,9 @@ debug_flag  SceUID fd = sceIoOpen(filename, SCE_O_RDONLY, 0);
 
         mod->data_base = mod->phdr[i].p_vaddr;
         mod->data_size = mod->phdr[i].p_memsz;
+
+        // in the case we could have more than one data seg
+        data_addr += prog_size;
       }
 
       char *zero = malloc(prog_size);
