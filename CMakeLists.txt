@@ -24,13 +24,13 @@ add_executable(Kero-Blaster
         loader/so_util.c
         loader/sha1.c
         loader/jni.c
+        loader/dyn_stub.c
         )
 
 target_link_libraries(Kero-Blaster
         -Wl,--whole-archive pthread -Wl,--no-whole-archive
         m
         stdc++
-        imgui
         vitaGL
         vitashark
         mathneon

@@ -1,6 +1,6 @@
 /* so_util.c -- utils to load and hook .so modules
  *
- * Copyright (C) 2021 Andy Nguyen
+ * Copyright (C) 2021 Andy Nguyen, KAAAsS
  *
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
@@ -22,6 +22,16 @@
 #include "main.h"
 #include "dialog.h"
 #include "so_util.h"
+
+#if !defined(DEBUG)
+#undef SHOW_RESOLVE_INFO
+#endif
+
+#if defined(SHOW_RESOLVE_INFO)
+#define log(fmt, ...) debugPrintf(fmt, __VA_ARGS__)
+#else
+#define log(fmt, ...)
+#endif
 
 static so_module *head = NULL, *tail = NULL;
 
@@ -134,7 +144,7 @@ int so_load(so_module *mod, const char *filename, uintptr_t load_addr) {
         opt.size = sizeof(SceKernelAllocMemBlockKernelOpt);
         opt.attr = 0x1;
         opt.field_C = (SceUInt32)data_addr;
-        debugPrintf("prog_size %d data_addr %x\n", prog_size, data_addr);
+
         res = mod->data_blockid = kuKernelAllocMemBlock("rw_block", SCE_KERNEL_MEMBLOCK_TYPE_USER_RW, prog_size, &opt);
         if (res < 0)
           goto err_free_text;
@@ -306,7 +316,7 @@ int so_resolve(so_module *mod, so_default_dynlib *default_dynlib, int size_defau
           if (!default_dynlib_only) {
             uintptr_t link = so_resolve_link(mod, mod->dynstr + sym->st_name);
             if (link) {
-              debugPrintf("Resolved from dependencies: %s\n", mod->dynstr + sym->st_name);
+              log("Resolved from dependencies: %s\n", mod->dynstr + sym->st_name);
               *ptr = link;
               resolved = 1;
             }
@@ -315,9 +325,9 @@ int so_resolve(so_module *mod, so_default_dynlib *default_dynlib, int size_defau
           for (int j = 0; j < size_default_dynlib / sizeof(so_default_dynlib); j++) {
             if (strcmp(mod->dynstr + sym->st_name, default_dynlib[j].symbol) == 0) {
               if (resolved) {
-                debugPrintf("Overriden: %s\n", mod->dynstr + sym->st_name);
+                log("Overriden: %s\n", mod->dynstr + sym->st_name);
               } else {
-                debugPrintf("Resolved manually: %s\n", mod->dynstr + sym->st_name);
+                log("Resolved manually: %s\n", mod->dynstr + sym->st_name);
               }
               *ptr = default_dynlib[j].func;
               resolved = 1;
@@ -326,7 +336,7 @@ int so_resolve(so_module *mod, so_default_dynlib *default_dynlib, int size_defau
           }
 
           if (!resolved) {
-            debugPrintf("Missing: %s\n", mod->dynstr + sym->st_name);
+            log("Missing: %s\n", mod->dynstr + sym->st_name);
           }
         }
 

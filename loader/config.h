@@ -15,5 +15,6 @@
 #define SCREEN_H 544
 
 #define TRACE_DYN_SYMBOL
+// #define SHOW_RESOLVE_INFO
 
 #endif
