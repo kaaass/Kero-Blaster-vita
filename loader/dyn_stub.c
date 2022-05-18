@@ -35,8 +35,11 @@
 #include <locale.h>
 #include <vitaGL.h>
 #include <psp2/ctrl.h>
+#include <stdbool.h>
+#include <sys/syslimits.h>
 
 #include "main.h"
+#include "jni.h"
 
 #define STUB_FUNC_FULL(name, rettype, retval, ...) rettype name(__VARGS__) { \
                             printf("stub: '" #name "' unimplemented\n"); \
@@ -74,6 +77,9 @@ extern void *_ZSt9terminatev();
 extern void *_ZTISt12length_error();
 extern void *_ZTVSt12length_error();
 
+bool *g_is_error = (bool *) (LOAD_ADDRESS + 0xd31e8);
+char **last_error = LOAD_ADDRESS + 0xd31ec;
+
 int ret0(void) {
     return 0;
 }
@@ -86,6 +92,12 @@ size_t __strlen_chk(const char *s, size_t s_len) {
     return strlen(s);
 }
 
+void check_last_error() {
+    if (*g_is_error) {
+        debugPrintf("[LastError]: %s\n", *last_error);
+    }
+}
+
 int __android_log_print(int prio, const char *tag, const char *fmt, ...) {
 #ifdef DEBUG
     va_list list;
@@ -96,6 +108,7 @@ int __android_log_print(int prio, const char *tag, const char *fmt, ...) {
     va_end(list);
 
     debugPrintf("[LOG] %s: %s\n", tag, string);
+    check_last_error();
 #endif
     return 0;
 }
@@ -103,6 +116,7 @@ int __android_log_print(int prio, const char *tag, const char *fmt, ...) {
 int __android_log_write(int prio, const char *tag, const char *text) {
 #ifdef DEBUG
     printf("[LOG] %s: %s\n", tag, text);
+    check_last_error();
 #endif
     return 0;
 }
@@ -114,10 +128,110 @@ int pipe (int fds[2]) {
     return 0;
 }
 
-STUB_FUNC(AAsset_close)
-STUB_FUNC(AAsset_getBuffer)
-STUB_FUNC(AAsset_getLength)
-STUB_FUNC(AAssetManager_open)
+int ALooper_pollAll(int timeout, int *outFd, int *outEvents, void **outData) {
+    debugPrintf("ALooper_pollAll(outFd = %x, outEvents = %x, outData = %x)\n", outFd, outEvents, outData);
+
+    static bool first = true;
+
+    if (first) {
+        first = false;
+        void (*onAppCmd)(void *app, int cmd) = (void (*)(void *, int)) (LOAD_ADDRESS + 0x17fb8 + 1);
+        // trigger INIT_WINDOW
+        *(uintptr_t *) (fake_activity.instance + 0x24) = 0x42424242;
+        onAppCmd(fake_activity.instance, 1);
+        // return empty callback
+        void *data = malloc(12);
+        *(((uintptr_t *) data) + 2) = (uintptr_t) &ret0;
+        *outData = data;
+        return 1;
+    } else {
+        return -1;
+    }
+}
+
+int eglCreateContext() {
+    debugPrintf("stub: eglCreateContext\n");
+    return 1;
+}
+
+void glGetShaderiv_hook(GLuint handle, GLenum pname, GLint *params) {
+    debugPrintf("glGetShaderiv_hook %d %d\n", handle, pname);
+    glGetShaderiv(handle, pname, params);
+    if (!*params) {
+        debugPrintf("[WARN] shader compile failed %d %d\n", *params, glGetError());
+    }
+}
+
+void glShaderSource_hook(GLuint handle, GLsizei count, const GLchar *const *string, const GLint *length) {
+    static int called_counts = 0;
+    if (called_counts >= n_replaced_shader) {
+        debugPrintf("[WARN] glShaderSource been called more than expected!\n");
+        called_counts = 0;
+    }
+    debugPrintf("called glShaderSource_hook, replace shader by %d\n", called_counts);
+    char *replace = replaced_shader[called_counts++];
+    glShaderSource(handle, count, (const char *const *) &replace, length);
+}
+
+GLint glGetUniformLocation_hook(GLuint prog, const GLchar *name) {
+    if (!strcmp(name, "texture")) {
+        name = "texture0";
+    }
+    return glGetUniformLocation(prog, name);
+}
+
+typedef struct {
+    FILE *fp;
+    void *buf;
+    off_t length;
+} Asset;
+
+Asset *AAssetManager_open(void *mgr, char *filename, int mode) {
+    char pathname[PATH_MAX];
+    debugPrintf("Open asset file: %s\n", filename);
+    if (mode != 3) {
+        debugPrintf("Unsupport asset open mode (%d)!\n", mode);
+        return NULL;
+    }
+    strcpy(pathname, ASSETS_PATH);
+    strcat(pathname, filename);
+    FILE *fp = fopen(pathname, "rb");
+    if (fp == NULL) {
+        return NULL;
+    }
+    Asset *result = malloc(sizeof(Asset));
+    result->fp = fp;
+    result->buf = NULL;
+    result->length = 0;
+    return result;
+}
+
+off_t AAsset_getLength(Asset *asset) {
+    return asset->length;
+}
+
+void *AAsset_getBuffer(Asset *asset) {
+    if (asset->buf == NULL) {
+        fseek(asset->fp, 0L, SEEK_END);
+        off_t len = ftell(asset->fp);
+        fseek(asset->fp, 0L, SEEK_SET);
+        void *buf = malloc(len);
+        fread(buf, len, 1, asset->fp);
+        asset->buf = buf;
+        asset->length = len;
+    }
+    return asset->buf;
+}
+
+void AAsset_close(Asset *asset) {
+    fclose(asset->fp);
+    if (asset->buf) {
+        free(asset->buf);
+        asset->buf = NULL;
+    }
+    free(asset);
+}
+
 STUB_FUNC(AConfiguration_delete)
 STUB_FUNC(AConfiguration_fromAssetManager)
 STUB_FUNC(AConfiguration_getCountry)
@@ -131,7 +245,6 @@ STUB_FUNC(AInputQueue_getEvent)
 STUB_FUNC(AInputQueue_preDispatchEvent)
 STUB_FUNC(AKeyEvent_getKeyCode)
 STUB_FUNC(ALooper_addFd)
-STUB_FUNC(ALooper_pollAll)
 STUB_FUNC(ALooper_prepare)
 STUB_FUNC(AMotionEvent_getAction)
 STUB_FUNC(AMotionEvent_getPointerCount)
@@ -141,7 +254,6 @@ STUB_FUNC(AMotionEvent_getY)
 STUB_FUNC(ANativeWindow_setBuffersGeometry)
 // fixme
 STUB_FUNC(eglChooseConfig)
-STUB_FUNC(eglCreateContext)
 STUB_FUNC(eglCreateWindowSurface)
 STUB_FUNC(eglDestroySurface)
 STUB_FUNC(eglGetConfigAttrib)

@@ -18,6 +18,7 @@
 #include <psp2/io/stat.h>
 #include <vitaGL.h>
 #include <psp2/ctrl.h>
+#include <malloc.h>
 
 #include "main.h"
 #include "config.h"
@@ -33,6 +34,15 @@ __attribute__((unused)) int _newlib_heap_size_user = MEMORY_NEWLIB_MB * 1024 * 1
 __attribute__((unused)) unsigned int _pthread_stack_default_user = 1 * 1024 * 1024; // NOLINT(bugprone-reserved-identifier)
 
 so_module kero_mod;
+
+char *replaced_shader_names[] = {
+        "Textured.vert",
+        "Textured.frag",
+        "Color_Fill.vert",
+        "Color_Fill.frag",
+};
+const int n_replaced_shader = sizeof(replaced_shader_names) / sizeof(char *);
+char *replaced_shader[sizeof(replaced_shader_names) / sizeof(char *)];
 
 void *__wrap_memcpy(void *dest, const void *src, size_t n) {
     return sceClibMemcpy(dest, src, n);
@@ -109,6 +119,25 @@ int file_exists(const char *path) {
     return sceIoGetstat(path, &stat) >= 0;
 }
 
+void load_shaders() {
+    char pathname[30];
+    for (int i = 0; i < n_replaced_shader; i++) {
+        strcpy(pathname, "app0:shader/");
+        strcat(pathname, replaced_shader_names[i]);
+        debugPrintf("Load replaced shader: %s\n", pathname);
+        // open file
+        FILE *fp = fopen(pathname, "r");
+        fseek(fp, 0L, SEEK_END);
+        int length = ftell(fp);
+        fseek(fp, 0L, SEEK_SET);
+        // read
+        char *buf = malloc(length + 1);
+        fread(buf, length, 1, fp);
+        buf[length] = '\0';
+        replaced_shader[i] = buf;
+    }
+}
+
 int main_thread(SceSize args, void *argp) {
     // init shark
     vglSetupRuntimeShaderCompiler(SHARK_OPT_UNSAFE, SHARK_ENABLE, SHARK_ENABLE,
@@ -117,6 +146,9 @@ int main_thread(SceSize args, void *argp) {
     vglInitExtended(0, SCREEN_W, SCREEN_H,
                     MEMORY_VITAGL_THRESHOLD_MB * 1024 * 1024,
                     SCE_GXM_MULTISAMPLE_4X);
+
+    // load shaders
+    load_shaders();
 
     // jni load
     jni_load();

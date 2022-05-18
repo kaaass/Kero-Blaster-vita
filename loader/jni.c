@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 #include "main.h"
 #include "jni.h"
 
@@ -52,6 +53,11 @@ void CallVoidMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
 
 void CallObjectMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
     debugPrintf("CallObjectMethodV: methodID = %d\n", methodID);
+}
+
+bool CallBooleanMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
+    debugPrintf("CallBooleanMethodV: methodID = %d\n", methodID);
+    return false;
 }
 
 void CallStaticVoidMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
@@ -121,6 +127,7 @@ void init_jni_env() {
     *(uintptr_t *) (fake_env + 0x7C) = (uintptr_t) GetObjectClass;
     *(uintptr_t *) (fake_env + 0x84) = (uintptr_t) GetMethodID;
     *(uintptr_t *) (fake_env + 0x8C) = (uintptr_t) CallObjectMethodV;
+    *(uintptr_t *) (fake_env + 0x98) = (uintptr_t) CallBooleanMethodV;
     *(uintptr_t *) (fake_env + 0xF8) = (uintptr_t) CallVoidMethodV;
     *(uintptr_t *) (fake_env + 0x1C4) = (uintptr_t) GetStaticMethodID;
     *(uintptr_t *) (fake_env + 0x238) = (uintptr_t) CallStaticVoidMethodV;

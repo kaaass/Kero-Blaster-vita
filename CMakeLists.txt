@@ -60,6 +60,7 @@ vita_create_vpk(Kero-Blaster.vpk ${VITA_TITLEID} eboot.bin
         VERSION ${VITA_VERSION}
         NAME ${VITA_APP_NAME}
         FILE ${CMAKE_SOURCE_DIR}/sce_sys sce_sys
+        FILE ${CMAKE_SOURCE_DIR}/shader shader
         )
 
 add_custom_target(launch

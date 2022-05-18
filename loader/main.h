@@ -7,6 +7,10 @@
 
 extern so_module kero_mod;
 
+extern const int n_replaced_shader;
+
+extern char *replaced_shader[];
+
 int debugPrintf(char *text, ...);
 
 int ret0();
