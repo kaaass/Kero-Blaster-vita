@@ -154,6 +154,10 @@ int ALooper_pollAll(int timeout, int *outFd, int *outEvents, void **outData) {
     } else if (call_count == 2) {
         return -1;
     } else {
+        // just for drawing test
+        vglSwapBuffers(GL_FALSE);
+        usleep(3 * 1000 * 1000);
+        exit(0);
         return -1;
     }
 }
@@ -187,6 +191,28 @@ GLint glGetUniformLocation_hook(GLuint prog, const GLchar *name) {
         name = "texture0";
     }
     return glGetUniformLocation(prog, name);
+}
+
+void glTexImage2D_hook(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border,
+                       GLenum format, GLenum type, const void *data) {
+    debugPrintf("glTexImage2D(%x %x %x w=%d h=%d %x %x %x d=%x)\n",
+                target, level, internalformat, width, height, border, format, type, data);
+    glTexImage2D(target, level, internalformat, width, height, border, format, type, data);
+}
+
+void glViewport_hook(GLint x, GLint y, GLsizei width, GLsizei height) {
+    debugPrintf("glViewport(%d, %d, %d, %d)\n", x, y, width, height);
+    glViewport(x, y, width, height);
+}
+
+void glBindTexture_hook(GLenum target, GLuint texture) {
+    debugPrintf("glBindTexture(%x, %d)\n", target, texture);
+    glBindTexture(target, texture);
+}
+
+void glDrawArrays_hook(GLenum mode, GLint first, GLsizei count) {
+    debugPrintf("glDrawArrays(%x, %d, %d)\n", mode, first, count);
+    glDrawArrays(mode, first, count);
 }
 
 typedef struct {
@@ -412,19 +438,6 @@ int pthread_cond_wait_fake(pthread_cond_t **cnd, pthread_mutex_t **mtx) {
             return -1;
     }
     return pthread_cond_wait(*cnd, *mtx);
-}
-
-void glTexImage2D_hook(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border,
-                       GLenum format, GLenum type, const void *data) {
-    debugPrintf("glTexImage2D(%x %x %x w=%d h=%d %x %x %x d=%x)\n",
-                target, level, internalformat, width, height, border, format, type, data);
-    if (level == 0)
-        glTexImage2D(target, level, internalformat, width, height, border, format, type, data);
-}
-
-void glViewport_hook(GLint x, GLint y, GLsizei width, GLsizei height) {
-    debugPrintf("glViewport(%d, %d, %d, %d)\n", x, y, width, height);
-    glViewport(x, y, width, height);
 }
 
 /*
