@@ -78,6 +78,11 @@ int debugPrintf(char *text, ...) {
     return 0;
 }
 
+void go() {
+    debugPrintf("trigger goooooooooooooooo\n");
+    exit(0);
+}
+
 int fake_load_se(void *se_ctx, char *name, int slot) {
     debugPrintf("fake_load_se(ctx = %x, name = '%s', slot = %x)\n", se_ctx, name, slot);
     return 1;
@@ -91,6 +96,7 @@ void patch_game(void) {
     // todo fix audio
     hook_addr(LOAD_ADDRESS + 0xaeb40 + 1, (uintptr_t) &fake_load_se);
 
+    // hook_addr(LOAD_ADDRESS + 0xaeb3a + 1, (uintptr_t) &go);
 //    hook_addr(so_symbol(&twom_mod, "__cxa_guard_acquire"), (uintptr_t) &__cxa_guard_acquire);
 //    hook_addr(so_symbol(&twom_mod, "__cxa_guard_release"), (uintptr_t) &__cxa_guard_release);
 //
@@ -163,6 +169,15 @@ int main_thread(SceSize args, void *argp) {
 
     // load shaders
     load_shaders();
+
+    // setup windows
+    int *g_screen_w = (int *) (LOAD_ADDRESS + 0xcdebc);
+    int *g_screen_h = (int *) (LOAD_ADDRESS + 0xcdec0);
+    int *g_framebuffer_w = (int *) (LOAD_ADDRESS + 0xd20c0);
+    int *g_framebuffer_h = (int *) (LOAD_ADDRESS + 0xd20c4);
+
+    *g_screen_w = *g_framebuffer_w = SCREEN_W;
+    *g_screen_h = *g_framebuffer_h = SCREEN_H;
 
     // jni load
     jni_load();
