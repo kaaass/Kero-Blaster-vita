@@ -166,54 +166,6 @@ int ALooper_pollAll(int timeout, int *outFd, int *outEvents, void **outData) {
     }
 }
 
-void glGetShaderiv_hook(GLuint handle, GLenum pname, GLint *params) {
-    debugPrintf("glGetShaderiv_hook %d %d\n", handle, pname);
-    glGetShaderiv(handle, pname, params);
-    if (!*params) {
-        debugPrintf("[WARN] shader compile failed %d %d\n", *params, glGetError());
-    }
-}
-
-void glShaderSource_hook(GLuint handle, GLsizei count, const GLchar *const *string, const GLint *length) {
-    static int called_counts = 0;
-    if (called_counts >= n_replaced_shader) {
-        debugPrintf("[WARN] glShaderSource been called more than expected!\n");
-        called_counts = 0;
-    }
-    debugPrintf("called glShaderSource_hook, replace shader by %d\n", called_counts);
-    char *replace = replaced_shader[called_counts++];
-    glShaderSource(handle, count, (const char *const *) &replace, length);
-}
-
-GLint glGetUniformLocation_hook(GLuint prog, const GLchar *name) {
-    if (!strcmp(name, "texture")) {
-        name = "texture0";
-    }
-    return glGetUniformLocation(prog, name);
-}
-
-void glTexImage2D_hook(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border,
-                       GLenum format, GLenum type, const void *data) {
-    debugPrintf("glTexImage2D(%x %x %x w=%d h=%d %x %x %x d=%x)\n",
-                target, level, internalformat, width, height, border, format, type, data);
-    glTexImage2D(target, level, internalformat, width, height, border, format, type, data);
-}
-
-void glViewport_hook(GLint x, GLint y, GLsizei width, GLsizei height) {
-    debugPrintf("glViewport(%d, %d, %d, %d)\n", x, y, width, height);
-    glViewport(x, y, width, height);
-}
-
-void glBindTexture_hook(GLenum target, GLuint texture) {
-    debugPrintf("glBindTexture(%x, %d)\n", target, texture);
-    glBindTexture(target, texture);
-}
-
-void glDrawArrays_hook(GLenum mode, GLint first, GLsizei count) {
-    debugPrintf("glDrawArrays(%x, %d, %d)\n", mode, first, count);
-    glDrawArrays(mode, first, count);
-}
-
 typedef struct {
     FILE *fp;
     void *buf;

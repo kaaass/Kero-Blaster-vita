@@ -39,15 +39,6 @@ __attribute__((unused)) unsigned int sceLibcHeapSize = 3 * 1024 * 1024;
 
 so_module kero_mod;
 
-char *replaced_shader_names[] = {
-        "Textured.vert",
-        "Textured.frag",
-        "Color_Fill.vert",
-        "Color_Fill.frag",
-};
-const int n_replaced_shader = sizeof(replaced_shader_names) / sizeof(char *);
-char *replaced_shader[sizeof(replaced_shader_names) / sizeof(char *)];
-
 void *__wrap_memcpy(void *dest, const void *src, size_t n) {
     return sceClibMemcpy(dest, src, n);
 }
@@ -141,34 +132,12 @@ int file_exists(const char *path) {
     return sceIoGetstat(path, &stat) >= 0;
 }
 
-void load_shaders() {
-    char pathname[30];
-    for (int i = 0; i < n_replaced_shader; i++) {
-        strcpy(pathname, "app0:shader/");
-        strcat(pathname, replaced_shader_names[i]);
-        debugPrintf("Load replaced shader: %s\n", pathname);
-        // open file
-        FILE *fp = fopen(pathname, "r");
-        fseek(fp, 0L, SEEK_END);
-        int length = ftell(fp);
-        fseek(fp, 0L, SEEK_SET);
-        // read
-        char *buf = malloc(length + 1);
-        fread(buf, length, 1, fp);
-        buf[length] = '\0';
-        replaced_shader[i] = buf;
-    }
-}
-
 int main_thread(SceSize args, void *argp) {
     // init pvr_psp2
     init_pvr_psp2();
 
     // init EGL
     init_egl();
-
-    // load shaders
-    load_shaders();
 
     // jni load
     jni_load();

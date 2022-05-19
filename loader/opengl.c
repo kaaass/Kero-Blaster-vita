@@ -1,12 +1,10 @@
 #include <psp2common/types.h>
-#include <EGL/eglplatform.h>
-#include <EGL/egl.h>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
 #include <stddef.h>
 #include <psp2/kernel/modulemgr.h>
 #include <gpu_es4/psp2_pvr_hint.h>
 #include <stdlib.h>
+#include <string.h>
+#include "opengl.h"
 
 int debugPrintf(char *text, ...);
 
@@ -63,7 +61,6 @@ int init_egl() {
         debugPrintf("Error: eglInitialize\n");
         exit(0);
     }
-    debugPrintf("EGL version: %d.%d\n", major, minor);
 
     eRetStatus = eglBindAPI(EGL_OPENGL_ES_API);
     if (eRetStatus != EGL_TRUE) {
@@ -107,11 +104,22 @@ int init_egl() {
         exit(0);
     }
 
+    const GLubyte *renderer = glGetString(GL_RENDERER);
+    const GLubyte *vendor = glGetString(GL_VENDOR);
+    const GLubyte *version = glGetString(GL_VERSION);
+    const GLubyte *glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+
+    debugPrintf("EGL Version          : %d.%d\n", major, minor);
+    debugPrintf("GL Vendor            : %s\n", vendor);
+    debugPrintf("GL Renderer          : %s\n", renderer);
+    debugPrintf("GL Version (string)  : %s\n", version);
+    debugPrintf("GLSL Version         : %s\n", glslVersion);
+
     return 0;
 }
 
 /*
- * EGL Hook
+ * EGL Hooks
  */
 
 EGLContext
@@ -126,4 +134,50 @@ eglCreateWindowSurface_hook(EGLDisplay dpy, EGLConfig config, EGLNativeWindowTyp
 
 EGLDisplay eglGetDisplay_hook(EGLNativeDisplayType display_id) {
     return egl_display;
+}
+
+/*
+ * OpenGL Hooks
+ */
+
+void glGetShaderiv_hook(GLuint handle, GLenum pname, GLint *params) {
+    debugPrintf("glGetShaderiv_hook %d %d\n", handle, pname);
+    glGetShaderiv(handle, pname, params);
+    if (!*params) {
+        debugPrintf("[WARN] shader compile failed %d %d\n", *params, glGetError());
+    }
+}
+
+GLint glGetUniformLocation_hook(GLuint prog, const GLchar *name) {
+    if (!strcmp(name, "texture")) {
+        name = "texture0";
+    }
+    return glGetUniformLocation(prog, name);
+}
+
+void glTexImage2D_hook(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border,
+                       GLenum format, GLenum type, const void *data) {
+    debugPrintf("glTexImage2D(%x %x %x w=%d h=%d %x %x %x d=%x)\n",
+                target, level, internalformat, width, height, border, format, type, data);
+    glTexImage2D(target, level, internalformat, width, height, border, format, type, data);
+}
+
+void glViewport_hook(GLint x, GLint y, GLsizei width, GLsizei height) {
+    debugPrintf("glViewport(%d, %d, %d, %d)\n", x, y, width, height);
+    glViewport(x, y, width, height);
+}
+
+void glBindTexture_hook(GLenum target, GLuint texture) {
+    debugPrintf("glBindTexture(%x, %d)\n", target, texture);
+    glBindTexture(target, texture);
+}
+
+void glDrawArrays_hook(GLenum mode, GLint first, GLsizei count) {
+    debugPrintf("glDrawArrays(%x, %d, %d)\n", mode, first, count);
+    glDrawArrays(mode, first, count);
+}
+
+void glGenTextures_hook(GLsizei n, GLuint *textures) {
+    glGenTextures(n, textures);
+    debugPrintf("glGenTextures(%d, %x) = %d\n", n, textures, *textures);
 }
