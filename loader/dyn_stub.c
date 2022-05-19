@@ -76,6 +76,8 @@ extern void *_ZNSt12length_errorD1Ev();
 extern void *_ZSt9terminatev();
 extern void *_ZTISt12length_error();
 extern void *_ZTVSt12length_error();
+extern void *_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE6resizeEjc();
+extern void *_ZNSt6chrono3_V212steady_clock3nowEv(void *clock);
 
 bool *g_is_error = (bool *) (LOAD_ADDRESS + 0xd31e8);
 char **last_error = LOAD_ADDRESS + 0xd31ec;
@@ -96,6 +98,11 @@ void check_last_error() {
     if (*g_is_error) {
         debugPrintf("[LastError]: %s\n", *last_error);
     }
+}
+
+void _ZNSt6__ndk16chrono12steady_clock3nowEv(uint64_t *clock) {
+    _ZNSt6chrono3_V212steady_clock3nowEv(clock);
+    debugPrintf("_ZNSt6chrono3_V212steady_clock3nowEv = %llu\n", clock);
 }
 
 int __android_log_print(int prio, const char *tag, const char *fmt, ...) {
@@ -129,12 +136,12 @@ int pipe (int fds[2]) {
 }
 
 int ALooper_pollAll(int timeout, int *outFd, int *outEvents, void **outData) {
-    debugPrintf("ALooper_pollAll(outFd = %x, outEvents = %x, outData = %x)\n", outFd, outEvents, outData);
+    // debugPrintf("ALooper_pollAll(outFd = %x, outEvents = %x, outData = %x)\n", outFd, outEvents, outData);
 
-    static bool first = true;
+    static int call_count = 0;
 
-    if (first) {
-        first = false;
+    call_count++;
+    if (call_count == 1) {
         void (*onAppCmd)(void *app, int cmd) = (void (*)(void *, int)) (LOAD_ADDRESS + 0x17fb8 + 1);
         // trigger INIT_WINDOW
         *(uintptr_t *) (fake_activity.instance + 0x24) = 0x42424242;
@@ -144,6 +151,8 @@ int ALooper_pollAll(int timeout, int *outFd, int *outEvents, void **outData) {
         *(((uintptr_t *) data) + 2) = (uintptr_t) &ret0;
         *outData = data;
         return 1;
+    } else if (call_count == 2) {
+        return -1;
     } else {
         return -1;
     }
@@ -265,6 +274,14 @@ STUB_FUNC(dlclose)
 STUB_FUNC(dlopen)
 STUB_FUNC(dlsym)
 STUB_FUNC(dl_unwind_find_exidx)
+
+STUB_FUNC(_ZNKSt6__ndk120__vector_base_commonILb1EE20__throw_length_errorEv)
+STUB_FUNC(_ZNSt6__ndk112__next_primeEj)
+STUB_FUNC(_ZNSt6__ndk119__shared_weak_count14__release_weakEv)
+STUB_FUNC(_ZNSt6__ndk15mutex4lockEv)
+STUB_FUNC(_ZNSt6__ndk15mutex6unlockEv)
+STUB_FUNC(_ZNSt6__ndk15mutex8try_lockEv)
+STUB_FUNC(_ZNSt6__ndk15mutexD1Ev)
 
 int pthread_create_fake(pthread_t *thread, const void *unused, void *entry, void *arg) {
     return pthread_create(thread, NULL, entry, arg);
@@ -405,6 +422,11 @@ void glTexImage2D_hook(GLenum target, GLint level, GLint internalformat, GLsizei
         glTexImage2D(target, level, internalformat, width, height, border, format, type, data);
 }
 
+void glViewport_hook(GLint x, GLint y, GLsizei width, GLsizei height) {
+    debugPrintf("glViewport(%d, %d, %d, %d)\n", x, y, width, height);
+    glViewport(x, y, width, height);
+}
+
 /*
  * Symbol resolve logic
  */
@@ -415,7 +437,8 @@ void glTexImage2D_hook(GLenum target, GLint level, GLint internalformat, GLsizei
 #endif
 
 #if defined(TRACE_DYN_SYMBOL)
-char *trace_ban_prefix[] = {"str", "mem", "malloc", "realloc", "free","_"};
+char *trace_ban_prefix[] = {"str", "mem", "malloc", "realloc", "free","_",
+                            "sin"};
 
 void trace_print(const char* sym, int a, int b, int c, int d) {
     for (int i = 0; i < sizeof(trace_ban_prefix) / sizeof(char *); i++) {

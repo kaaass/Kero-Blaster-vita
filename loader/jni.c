@@ -51,6 +51,16 @@ void CallVoidMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
     debugPrintf("CallVoidMethodV: methodID = %d\n", methodID);
 }
 
+int GetFieldID(void *env, void *class, char *name, char *type) {
+    debugPrintf("GetFieldID: %s\n", name);
+    return 0;
+}
+
+void *GetObjectField(void *env, void *obj, int fieldID) {
+    debugPrintf("GetObjectField: fieldID = %d\n", fieldID);
+    return "";
+}
+
 void CallObjectMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
     debugPrintf("CallObjectMethodV: methodID = %d\n", methodID);
 }
@@ -129,9 +139,11 @@ void init_jni_env() {
     *(uintptr_t *) (fake_env + 0x8C) = (uintptr_t) CallObjectMethodV;
     *(uintptr_t *) (fake_env + 0x98) = (uintptr_t) CallBooleanMethodV;
     *(uintptr_t *) (fake_env + 0xF8) = (uintptr_t) CallVoidMethodV;
+    *(uintptr_t *) (fake_env + 0x178) = (uintptr_t) GetFieldID;
+    *(uintptr_t *) (fake_env + 0x17C) = (uintptr_t) GetObjectField;
     *(uintptr_t *) (fake_env + 0x1C4) = (uintptr_t) GetStaticMethodID;
-    *(uintptr_t *) (fake_env + 0x238) = (uintptr_t) CallStaticVoidMethodV;
     *(uintptr_t *) (fake_env + 0x1D8) = (uintptr_t) CallStaticBooleanMethodV;
+    *(uintptr_t *) (fake_env + 0x238) = (uintptr_t) CallStaticVoidMethodV;
     *(uintptr_t *) (fake_env + 0x29C) = (uintptr_t) NewStringUTF;
     *(uintptr_t *) (fake_env + 0x2A4) = (uintptr_t) GetStringUTFChars;
     *(uintptr_t *) (fake_env + 0x2A8) = (uintptr_t) ret0; // ReleaseStringUTFChars
