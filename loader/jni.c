@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <psp2/message_dialog.h>
 #include "main.h"
 #include "jni.h"
+#include "dialog.h"
 
 char fake_vm[0x1000];
 char fake_env[0x1000];
@@ -11,8 +13,7 @@ ANativeActivityCallbacks fake_callbacks;
 
 enum MethodIDs {
     UNKNOWN = 0,
-    INIT,
-    SYNC_EVENTS,
+    messageBox,
 } MethodIDs;
 
 typedef struct {
@@ -21,7 +22,7 @@ typedef struct {
 } NameToMethodID;
 
 static NameToMethodID name_to_method_ids[] = {
-        {"<init>",            INIT},
+        {"messageBox",            messageBox},
 };
 
 int GetMethodID(void *env, void *class, const char *name, const char *sig) {
@@ -68,6 +69,20 @@ void CallObjectMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
 bool CallBooleanMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
     debugPrintf("CallBooleanMethodV: methodID = %d\n", methodID);
     return false;
+}
+
+int CallIntMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
+    debugPrintf("CallIntMethodV: methodID = %d\n", methodID);
+    switch (methodID) {
+        case messageBox: {
+            char *title = *(char **) &args[0];
+            char *content = *(char **) &args[1];
+            bool show_cancel = *(bool *) &args[2];
+            fatal_error("[%s]\n%s", title, content);
+            return 1;
+        }
+    }
+    return 0;
 }
 
 void CallStaticVoidMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
@@ -138,6 +153,7 @@ void init_jni_env() {
     *(uintptr_t *) (fake_env + 0x84) = (uintptr_t) GetMethodID;
     *(uintptr_t *) (fake_env + 0x8C) = (uintptr_t) CallObjectMethodV;
     *(uintptr_t *) (fake_env + 0x98) = (uintptr_t) CallBooleanMethodV;
+    *(uintptr_t *) (fake_env + 0xC8) = (uintptr_t) CallIntMethodV;
     *(uintptr_t *) (fake_env + 0xF8) = (uintptr_t) CallVoidMethodV;
     *(uintptr_t *) (fake_env + 0x178) = (uintptr_t) GetFieldID;
     *(uintptr_t *) (fake_env + 0x17C) = (uintptr_t) GetObjectField;

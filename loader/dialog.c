@@ -132,6 +132,7 @@ void fatal_error(const char *fmt, ...) {
   vsnprintf(string, sizeof(string), fmt, list);
   va_end(list);
 
+// fixme: message box
 //  vglInit(0);
 
   init_msg_dialog(string);
