@@ -397,8 +397,10 @@ int pthread_cond_wait_fake(pthread_cond_t **cnd, pthread_mutex_t **mtx) {
     return pthread_cond_wait(*cnd, *mtx);
 }
 
-void glTexImage2DHook(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border,
-                      GLenum format, GLenum type, const void *data) {
+void glTexImage2D_hook(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border,
+                       GLenum format, GLenum type, const void *data) {
+    debugPrintf("glTexImage2D(%x %x %x w=%d h=%d %x %x %x d=%x)\n",
+                target, level, internalformat, width, height, border, format, type, data);
     if (level == 0)
         glTexImage2D(target, level, internalformat, width, height, border, format, type, data);
 }
@@ -423,9 +425,9 @@ void trace_print(const char* sym, int a, int b, int c, int d) {
     }
     printf("dyn symbol trace: %s\n", sym);
 }
-#define DYN_SYMBOL(name, sym) int __trace_##name(int a, int b, int c, int d, int e, int f, int g, int h) { \
-    trace_print(#name,a,b,c,d); \
-    return ((int (*)(int,int,int,int,int,int,int,int))((void *) &sym))(a,b,c,d,e,f,g,h); \
+#define DYN_SYMBOL(name, sym) int __trace_##name(int p0,int p1,int p2,int p3,int p4,int p5,int p6,int p7,int p8, int p9) { \
+    trace_print(#name,p0,p1,p2,p3); \
+    return ((int (*)(int,int,int,int,int,int,int,int,int,int))((void *) &sym))(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9); \
 }
 #define DYN_SYMBOL_DATA(name, sym)
 #include "dyn_symbols.h"
