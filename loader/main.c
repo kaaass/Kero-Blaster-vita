@@ -19,6 +19,8 @@
 #include <vitaGL.h>
 #include <psp2/ctrl.h>
 #include <malloc.h>
+#include <kubridge.h>
+#include <stdlib.h>
 
 #include "main.h"
 #include "config.h"
@@ -76,7 +78,19 @@ int debugPrintf(char *text, ...) {
     return 0;
 }
 
+int fake_load_se(void *se_ctx, char *name, int slot) {
+    debugPrintf("fake_load_se(ctx = %x, name = '%s', slot = %x)\n", se_ctx, name, slot);
+    return 1;
+}
+
 void patch_game(void) {
+    // patch 0x17dd8 bne -> beq
+    uint16_t beq = 0xd018;
+    kuKernelCpuUnrestrictedMemcpy((void *)(LOAD_ADDRESS + 0x17dd8), &beq, sizeof(beq));
+
+    // todo fix audio
+    hook_addr(LOAD_ADDRESS + 0xaeb40 + 1, (uintptr_t) &fake_load_se);
+
 //    hook_addr(so_symbol(&twom_mod, "__cxa_guard_acquire"), (uintptr_t) &__cxa_guard_acquire);
 //    hook_addr(so_symbol(&twom_mod, "__cxa_guard_release"), (uintptr_t) &__cxa_guard_release);
 //
