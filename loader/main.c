@@ -16,11 +16,11 @@
 #include <stdarg.h>
 #include <string.h>
 #include <psp2/io/stat.h>
-#include <vitaGL.h>
 #include <psp2/ctrl.h>
 #include <malloc.h>
 #include <kubridge.h>
 #include <stdlib.h>
+#include <EGL/egl1_4.h>
 
 #include "main.h"
 #include "config.h"
@@ -29,11 +29,13 @@
 #include "sha1.h"
 #include "jni.h"
 #include "dyn_stub.h"
+#include "opengl.h"
 
 #define debug_flag debugPrintf("%s:%d\n", __FILE__, __LINE__);
 
 __attribute__((unused)) int _newlib_heap_size_user = MEMORY_NEWLIB_MB * 1024 * 1024; // NOLINT(bugprone-reserved-identifier)
 __attribute__((unused)) unsigned int _pthread_stack_default_user = 1 * 1024 * 1024; // NOLINT(bugprone-reserved-identifier)
+__attribute__((unused)) unsigned int sceLibcHeapSize = 3 * 1024 * 1024;
 
 so_module kero_mod;
 
@@ -159,25 +161,14 @@ void load_shaders() {
 }
 
 int main_thread(SceSize args, void *argp) {
-    // init shark
-    vglSetupRuntimeShaderCompiler(SHARK_OPT_UNSAFE, SHARK_ENABLE, SHARK_ENABLE,
-                                  SHARK_ENABLE);
-    vglUseVram(GL_TRUE);
-    vglInitExtended(0, SCREEN_W, SCREEN_H,
-                    MEMORY_VITAGL_THRESHOLD_MB * 1024 * 1024,
-                    SCE_GXM_MULTISAMPLE_4X);
+    // init pvr_psp2
+    init_pvr_psp2();
+
+    // init EGL
+    init_egl();
 
     // load shaders
     load_shaders();
-
-    // setup windows
-    int *g_screen_w = (int *) (LOAD_ADDRESS + 0xcdebc);
-    int *g_screen_h = (int *) (LOAD_ADDRESS + 0xcdec0);
-    int *g_framebuffer_w = (int *) (LOAD_ADDRESS + 0xd20c0);
-    int *g_framebuffer_h = (int *) (LOAD_ADDRESS + 0xd20c4);
-
-    *g_screen_w = *g_framebuffer_w = SCREEN_W;
-    *g_screen_h = *g_framebuffer_h = SCREEN_H;
 
     // jni load
     jni_load();

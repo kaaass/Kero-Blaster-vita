@@ -33,13 +33,17 @@
 #include <netdb.h>
 #include <sys/poll.h>
 #include <locale.h>
-#include <vitaGL.h>
 #include <psp2/ctrl.h>
 #include <stdbool.h>
 #include <sys/syslimits.h>
+#include <EGL/eglplatform.h>
+#include <EGL/egl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 
 #include "main.h"
 #include "jni.h"
+#include "opengl.h"
 
 #define STUB_FUNC_FULL(name, rettype, retval, ...) rettype name(__VARGS__) { \
                             printf("stub: '" #name "' unimplemented\n"); \
@@ -155,16 +159,11 @@ int ALooper_pollAll(int timeout, int *outFd, int *outEvents, void **outData) {
         return -1;
     } else {
         // just for drawing test
-        vglSwapBuffers(GL_FALSE);
+        // eglCreateContext();
         usleep(3 * 1000 * 1000);
         exit(0);
         return -1;
     }
-}
-
-int eglCreateContext() {
-    debugPrintf("stub: eglCreateContext\n");
-    return 1;
 }
 
 void glGetShaderiv_hook(GLuint handle, GLenum pname, GLint *params) {
@@ -287,14 +286,6 @@ STUB_FUNC(AMotionEvent_getPointerId)
 STUB_FUNC(AMotionEvent_getX)
 STUB_FUNC(AMotionEvent_getY)
 STUB_FUNC(ANativeWindow_setBuffersGeometry)
-// fixme
-STUB_FUNC(eglChooseConfig)
-STUB_FUNC(eglCreateWindowSurface)
-STUB_FUNC(eglDestroySurface)
-STUB_FUNC(eglGetConfigAttrib)
-STUB_FUNC(eglInitialize)
-STUB_FUNC(eglMakeCurrent)
-STUB_FUNC(eglQuerySurface)
 // fixme
 STUB_FUNC(dlclose)
 STUB_FUNC(dlopen)

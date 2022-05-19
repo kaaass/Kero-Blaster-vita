@@ -18,6 +18,8 @@ set(VITA_MKSFOEX_FLAGS "-d ATTRIBUTE2=12")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wl,-q,--wrap,memcpy,--wrap,memmove,--wrap,memset -D_GNU_SOURCE -Wall -O3 -mfloat-abi=softfp")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 
+add_definitions(-D__psp2__)
+
 add_executable(Kero-Blaster
         loader/main.c
         loader/dialog.c
@@ -25,14 +27,13 @@ add_executable(Kero-Blaster
         loader/sha1.c
         loader/jni.c
         loader/dyn_stub.c
+        loader/opengl.c
         )
 
 target_link_libraries(Kero-Blaster
         -Wl,--whole-archive pthread -Wl,--no-whole-archive
         m
         stdc++
-        vitaGL
-        vitashark
         mathneon
         kubridge_stub
         SceAppMgr_stub
@@ -46,13 +47,14 @@ target_link_libraries(Kero-Blaster
         SceRazorHud_stub
         SceRazorCapture_stub
         SceFios2_stub
-        SceGxm_stub
         SceLibcBridge_stub
-        SceShaccCg_stub
         SceSysmodule_stub
         ScePower_stub
         SceTouch_stub
         SceVshBridge_stub
+        libIMGEGL_stub_weak
+        libgpu_es4_ext_stub_weak
+        libGLESv2_stub_weak
         )
 
 vita_create_self(eboot.bin Kero-Blaster UNSAFE)
@@ -61,6 +63,7 @@ vita_create_vpk(Kero-Blaster.vpk ${VITA_TITLEID} eboot.bin
         NAME ${VITA_APP_NAME}
         FILE ${CMAKE_SOURCE_DIR}/sce_sys sce_sys
         FILE ${CMAKE_SOURCE_DIR}/shader shader
+        FILE ${CMAKE_SOURCE_DIR}/module module
         )
 
 add_custom_target(launch

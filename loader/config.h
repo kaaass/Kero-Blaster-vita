@@ -5,7 +5,7 @@
 
 #define LOAD_ADDRESS 0x98000000
 
-#define MEMORY_NEWLIB_MB 240
+#define MEMORY_NEWLIB_MB 100
 #define MEMORY_VITAGL_THRESHOLD_MB 12
 
 #define DATA_PATH "ux0:data/kero"
