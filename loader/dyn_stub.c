@@ -40,6 +40,7 @@
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#include <assert.h>
 
 #include "main.h"
 #include "jni.h"
@@ -174,15 +175,16 @@ typedef struct {
 
 Asset *AAssetManager_open(void *mgr, char *filename, int mode) {
     char pathname[PATH_MAX];
-    debugPrintf("Open asset file: %s\n", filename);
     if (mode != 3) {
-        debugPrintf("Unsupport asset open mode (%d)!\n", mode);
+        debugPrintf("Unsupported asset open mode (%d)!\n", mode);
         return NULL;
     }
     strcpy(pathname, ASSETS_PATH);
     strcat(pathname, filename);
+    debugPrintf("Open asset file: %s\n", pathname);
     FILE *fp = fopen(pathname, "rb");
     if (fp == NULL) {
+        debugPrintf("Cannot open file: %s\n", pathname);
         return NULL;
     }
     Asset *result = malloc(sizeof(Asset));
@@ -198,11 +200,14 @@ off_t AAsset_getLength(Asset *asset) {
 
 void *AAsset_getBuffer(Asset *asset) {
     if (asset->buf == NULL) {
+        assert(asset->fp);
         fseek(asset->fp, 0L, SEEK_END);
         off_t len = ftell(asset->fp);
         fseek(asset->fp, 0L, SEEK_SET);
         void *buf = malloc(len);
         fread(buf, len, 1, asset->fp);
+        fclose(asset->fp);
+        asset->fp = NULL;
         asset->buf = buf;
         asset->length = len;
     }
@@ -210,7 +215,9 @@ void *AAsset_getBuffer(Asset *asset) {
 }
 
 void AAsset_close(Asset *asset) {
-    fclose(asset->fp);
+    if (asset->fp) {
+        fclose(asset->fp);
+    }
     if (asset->buf) {
         free(asset->buf);
         asset->buf = NULL;
