@@ -30,6 +30,7 @@ add_executable(Kero-Blaster
         loader/dyn_stub.c
         loader/opengl.c
         loader/control.c
+        loader/llvm_next_prime.cpp
         )
 
 target_link_libraries(Kero-Blaster

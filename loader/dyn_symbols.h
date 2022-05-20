@@ -41,7 +41,7 @@ DYN_SYMBOL_DEFAULT(_ZNKSt6__ndk120__vector_base_commonILb1EE20__throw_length_err
 // todo impl audio
 DYN_SYMBOL(_ZN4oboe18AudioStreamBuilder10openStreamERNSt6__ndk110shared_ptrINS_11AudioStreamEEE, ret0)
 // fixme ndk stuff
-DYN_SYMBOL_DEFAULT(_ZNSt6__ndk112__next_primeEj)
+DYN_SYMBOL(_ZNSt6__ndk112__next_primeEj, next_prime)
 DYN_SYMBOL_DEFAULT(_ZNSt6__ndk119__shared_weak_count14__release_weakEv)
 DYN_SYMBOL_DEFAULT(_ZNSt6__ndk15mutex4lockEv)
 DYN_SYMBOL_DEFAULT(_ZNSt6__ndk15mutex6unlockEv)

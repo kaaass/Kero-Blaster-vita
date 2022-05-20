@@ -46,6 +46,7 @@
 #include "opengl.h"
 #include "control.h"
 #include "so_util.h"
+#include "llvm_next_prime.h"
 
 #define STUB_FUNC_FULL(name, rettype, retval, ...) rettype name(__VARGS__) { \
                             printf("stub: '" #name "' unimplemented\n"); \
@@ -241,7 +242,6 @@ STUB_FUNC(dlsym)
 STUB_FUNC(dl_unwind_find_exidx)
 
 STUB_FUNC(_ZNKSt6__ndk120__vector_base_commonILb1EE20__throw_length_errorEv)
-STUB_FUNC(_ZNSt6__ndk112__next_primeEj)
 STUB_FUNC(_ZNSt6__ndk119__shared_weak_count14__release_weakEv)
 STUB_FUNC(_ZNSt6__ndk15mutex4lockEv)
 STUB_FUNC(_ZNSt6__ndk15mutex6unlockEv)
