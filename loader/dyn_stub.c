@@ -245,15 +245,9 @@ STUB_FUNC(ANativeWindow_setBuffersGeometry)
 STUB_FUNC(dlclose)
 STUB_FUNC(dlopen)
 STUB_FUNC(dlsym)
-// fixme
 STUB_FUNC(dl_unwind_find_exidx)
-
 STUB_FUNC(_ZNKSt6__ndk120__vector_base_commonILb1EE20__throw_length_errorEv)
 STUB_FUNC(_ZNSt6__ndk119__shared_weak_count14__release_weakEv)
-STUB_FUNC(_ZNSt6__ndk15mutex4lockEv)
-STUB_FUNC(_ZNSt6__ndk15mutex6unlockEv)
-STUB_FUNC(_ZNSt6__ndk15mutex8try_lockEv)
-STUB_FUNC(_ZNSt6__ndk15mutexD1Ev)
 
 int pthread_create_fake(pthread_t *thread, const void *unused, void *entry, void *arg) {
     return pthread_create(thread, NULL, entry, arg);
