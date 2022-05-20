@@ -3,9 +3,9 @@
 
 #include <psp2/touch.h>
 #include "config.h"
-#include "so_util.h"
 
-extern so_module kero_mod;
+struct so_module;
+extern struct so_module kero_mod;
 
 int debugPrintf(char *text, ...);
 

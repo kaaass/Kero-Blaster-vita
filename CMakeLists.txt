@@ -29,6 +29,7 @@ add_executable(Kero-Blaster
         loader/jni.c
         loader/dyn_stub.c
         loader/opengl.c
+        loader/control.c
         )
 
 target_link_libraries(Kero-Blaster

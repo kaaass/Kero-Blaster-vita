@@ -44,6 +44,8 @@
 #include "main.h"
 #include "jni.h"
 #include "opengl.h"
+#include "control.h"
+#include "so_util.h"
 
 #define STUB_FUNC_FULL(name, rettype, retval, ...) rettype name(__VARGS__) { \
                             printf("stub: '" #name "' unimplemented\n"); \
@@ -106,7 +108,7 @@ void check_last_error() {
 
 void _ZNSt6__ndk16chrono12steady_clock3nowEv(uint64_t *clock) {
     _ZNSt6chrono3_V212steady_clock3nowEv(clock);
-    debugPrintf("_ZNSt6chrono3_V212steady_clock3nowEv = %llu\n", clock);
+    // debugPrintf("_ZNSt6chrono3_V212steady_clock3nowEv = %llu\n", clock);
 }
 
 int __android_log_print(int prio, const char *tag, const char *fmt, ...) {
@@ -143,22 +145,23 @@ int ALooper_pollAll(int timeout, int *outFd, int *outEvents, void **outData) {
     // debugPrintf("ALooper_pollAll(outFd = %x, outEvents = %x, outData = %x)\n", outFd, outEvents, outData);
 
     static int call_count = 0;
+    static uintptr_t empty_callback[3] = {0, 0, (uintptr_t) &ret0};
 
+    // return empty callback
+    *outData = empty_callback;
+    // process event
     call_count++;
     if (call_count == 1) {
         void (*onAppCmd)(void *app, int cmd) = (void (*)(void *, int)) (LOAD_ADDRESS + 0x17fb8 + 1);
         // trigger INIT_WINDOW
         *(uintptr_t *) (fake_activity.instance + 0x24) = 0x42424242;
         onAppCmd(fake_activity.instance, 1);
-        // return empty callback
-        void *data = malloc(12);
-        *(((uintptr_t *) data) + 2) = (uintptr_t) &ret0;
-        *outData = data;
         return 1;
     } else if (call_count == 2) {
+        // do nothing
         return -1;
     } else {
-        return -1;
+        return process_control_event();
     }
 }
 
@@ -219,16 +222,13 @@ STUB_FUNC(AConfiguration_fromAssetManager)
 STUB_FUNC(AConfiguration_getCountry)
 STUB_FUNC(AConfiguration_getLanguage)
 STUB_FUNC(AConfiguration_new)
-STUB_FUNC(AInputEvent_getType)
 STUB_FUNC(AInputQueue_attachLooper)
 STUB_FUNC(AInputQueue_detachLooper)
 STUB_FUNC(AInputQueue_finishEvent)
 STUB_FUNC(AInputQueue_getEvent)
 STUB_FUNC(AInputQueue_preDispatchEvent)
-STUB_FUNC(AKeyEvent_getKeyCode)
 STUB_FUNC(ALooper_addFd)
 STUB_FUNC(ALooper_prepare)
-STUB_FUNC(AMotionEvent_getAction)
 STUB_FUNC(AMotionEvent_getPointerCount)
 STUB_FUNC(AMotionEvent_getPointerId)
 STUB_FUNC(AMotionEvent_getX)

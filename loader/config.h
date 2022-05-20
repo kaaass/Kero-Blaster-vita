@@ -15,7 +15,9 @@
 #define SCREEN_W 960
 #define SCREEN_H 544
 
-#define TRACE_DYN_SYMBOL
+#define EVENT_BUFFER_LEN 50
+
+// #define TRACE_DYN_SYMBOL
 // #define SHOW_RESOLVE_INFO
 
 #endif

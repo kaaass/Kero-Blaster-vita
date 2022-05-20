@@ -30,6 +30,7 @@
 #include "jni.h"
 #include "dyn_stub.h"
 #include "opengl.h"
+#include "control.h"
 
 #define debug_flag debugPrintf("%s:%d\n", __FILE__, __LINE__);
 
@@ -139,21 +140,6 @@ int file_exists(const char *path) {
     return sceIoGetstat(path, &stat) >= 0;
 }
 
-int main_thread(SceSize args, void *argp) {
-    // init pvr_psp2
-    init_pvr_psp2();
-
-    // jni load
-    jni_load();
-
-    return 0;
-}
-
-int ctrl_thread(SceSize args, void *argp) {
-
-    return 0;
-}
-
 int main(int argc, char *argv[]) {
     debugPrintf("%c[2J", 27);
     sceCtrlSetSamplingModeExt(SCE_CTRL_MODE_ANALOG_WIDE);
@@ -178,15 +164,18 @@ int main(int argc, char *argv[]) {
 
     so_initialize(&kero_mod);
 
-    // game thread
-//    SceUID thid = sceKernelCreateThread("main_thread", (SceKernelThreadEntry) main_thread, 0x40, 128 * 1024,
-//                                        0, 0, NULL);
-//    sceKernelStartThread(thid, 0, NULL);
-    main_thread(0, 0);
+    // init pvr_psp2
+    init_pvr_psp2();
 
-    // ctrl thread
-//    SceUID ctrl_thid = sceKernelCreateThread("ctrl_thread", (SceKernelThreadEntry) ctrl_thread, 0x10000100, 128 * 1024, 0, 0, NULL);
-//    sceKernelStartThread(ctrl_thid, 0, NULL);
+    // init event buffer
+    event_buf_init();
+
+    // jni load
+    jni_load();
+
+    // start ctrl thread
+    SceUID ctrl_thid = sceKernelCreateThread("ctrl_thread", (SceKernelThreadEntry) ctrl_thread, 0x10000100, 128 * 1024, 0, 0, NULL);
+    sceKernelStartThread(ctrl_thid, 0, NULL);
 
     return sceKernelExitDeleteThread(0);
 }
