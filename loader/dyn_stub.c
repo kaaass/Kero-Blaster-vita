@@ -158,10 +158,6 @@ int ALooper_pollAll(int timeout, int *outFd, int *outEvents, void **outData) {
     } else if (call_count == 2) {
         return -1;
     } else {
-        // just for drawing test
-        // eglCreateContext();
-        usleep(3 * 1000 * 1000);
-        exit(0);
         return -1;
     }
 }
@@ -238,10 +234,10 @@ STUB_FUNC(AMotionEvent_getPointerId)
 STUB_FUNC(AMotionEvent_getX)
 STUB_FUNC(AMotionEvent_getY)
 STUB_FUNC(ANativeWindow_setBuffersGeometry)
-// fixme
 STUB_FUNC(dlclose)
 STUB_FUNC(dlopen)
 STUB_FUNC(dlsym)
+// fixme
 STUB_FUNC(dl_unwind_find_exidx)
 
 STUB_FUNC(_ZNKSt6__ndk120__vector_base_commonILb1EE20__throw_length_errorEv)
@@ -381,6 +377,119 @@ int pthread_cond_wait_fake(pthread_cond_t **cnd, pthread_mutex_t **mtx) {
             return -1;
     }
     return pthread_cond_wait(*cnd, *mtx);
+}
+
+/*
+ * Softfp wrapper
+ */
+
+int64_t atan_sfp(int64_t a1) {
+    double fa1;
+    int64_t ires;
+
+    fa1 = *(double *)(&a1);
+    double fres = atan(fa1);
+    ires = *(int64_t *)(&fres);
+
+    return ires;
+}
+
+int64_t ceil_sfp(int64_t a1) {
+    double fa1;
+    int64_t ires;
+
+    fa1 = *(double *)(&a1);
+    double fres = ceil(fa1);
+    ires = *(int64_t *)(&fres);
+
+    return ires;
+}
+
+int ceilf_sfp(int a1) {
+    float fa1;
+    int ires;
+
+    fa1 = *(float *)(&a1);
+    float fres = ceilf(fa1);
+    ires = *(int *)(&fres);
+
+    return ires;
+}
+
+int cosf_sfp(int a1) {
+    float fa1;
+    int ires;
+
+    fa1 = *(float *)(&a1);
+    float fres = cosf(fa1);
+    ires = *(int *)(&fres);
+
+    return ires;
+}
+
+int powf_sfp(int a1, int a2) {
+    float fa1, fa2;
+    int ires;
+
+    fa1 = *(float *)(&a1);
+    fa2 = *(float *)(&a2);
+    float fres = powf(fa1, fa2);
+    ires = *(int *)(&fres);
+
+    return ires;
+}
+
+int64_t sin_sfp(int64_t a1) {
+    double fa1;
+    int64_t ires;
+
+    fa1 = *(double *)(&a1);
+    double fres = sin(fa1);
+    ires = *(int64_t *)(&fres);
+
+    return ires;
+}
+
+void sincos_sfp(int64_t a, double *b, double *c) {
+    double fa1;
+
+    fa1 = *(double *)(&a);
+    sincos(fa1, b, c);
+}
+
+void sincosf_sfp(float a, float *b, float *c) {
+    float fa1;
+
+    fa1 = *(float *)(&a);
+    sincosf(fa1, b, c);
+}
+
+int sinf_sfp(int a1) {
+    float fa1;
+    int ires;
+
+    fa1 = *(float *)(&a1);
+    float fres = sinf(fa1);
+    ires = *(int *)(&fres);
+
+    return ires;
+}
+
+void glClearColor_sfp(int i_red, int i_green, int i_blue, int i_alpha) {
+    float red, green, blue, alpha;
+
+    red = *(float *)(&i_red);
+    green = *(float *)(&i_green);
+    blue = *(float *)(&i_blue);
+    alpha = *(float *)(&i_alpha);
+    glClearColor(red, green, blue, alpha);
+}
+
+void glTexParameterf_sfp(GLenum target, GLenum pname, int i_param) {
+    float param;
+
+    param = *(float *)(&i_param);
+    glTexParameterf(target, pname, param);
 }
 
 /*

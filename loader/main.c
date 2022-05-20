@@ -35,7 +35,7 @@
 
 __attribute__((unused)) int _newlib_heap_size_user = MEMORY_NEWLIB_MB * 1024 * 1024; // NOLINT(bugprone-reserved-identifier)
 __attribute__((unused)) unsigned int _pthread_stack_default_user = 1 * 1024 * 1024; // NOLINT(bugprone-reserved-identifier)
-__attribute__((unused)) unsigned int sceLibcHeapSize = 3 * 1024 * 1024;
+__attribute__((unused)) unsigned int sceLibcHeapSize = 12 * 1024 * 1024;
 
 so_module kero_mod;
 
@@ -136,9 +136,6 @@ int main_thread(SceSize args, void *argp) {
     // init pvr_psp2
     init_pvr_psp2();
 
-    // init EGL
-    init_egl();
-
     // jni load
     jni_load();
 
@@ -151,6 +148,7 @@ int ctrl_thread(SceSize args, void *argp) {
 }
 
 int main(int argc, char *argv[]) {
+    debugPrintf("%c[2J", 27);
     sceCtrlSetSamplingModeExt(SCE_CTRL_MODE_ANALOG_WIDE);
     sceTouchSetSamplingState(SCE_TOUCH_PORT_FRONT, SCE_TOUCH_SAMPLING_STATE_START);
 
@@ -161,9 +159,6 @@ int main(int argc, char *argv[]) {
 
     if (check_kubridge() < 0)
         fatal_error("Error kubridge.skprx is not installed.");
-
-    if (!file_exists("ur0:/data/libshacccg.suprx") && !file_exists("ur0:/data/external/libshacccg.suprx"))
-        fatal_error("Error libshacccg.suprx is not installed.");
 
     if (so_load(&kero_mod, SO_PATH, LOAD_ADDRESS) < 0)
         fatal_error("Error could not load %s.", SO_PATH);

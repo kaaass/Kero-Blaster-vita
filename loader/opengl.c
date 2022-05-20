@@ -31,7 +31,7 @@ void init_pvr_psp2() {
 }
 
 int init_egl() {
-    EGLConfig configs[2];
+    EGLConfig config;
     EGLBoolean eRetStatus;
     EGLint major, minor;
     EGLint config_count;
@@ -55,6 +55,10 @@ int init_egl() {
     };
 
     egl_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (egl_display == EGL_NO_DISPLAY) {
+        debugPrintf("Error: eglGetDisplay\n");
+        exit(0);
+    }
 
     eRetStatus = eglInitialize(egl_display, &major, &minor);
     if (eRetStatus != EGL_TRUE) {
@@ -68,13 +72,7 @@ int init_egl() {
         exit(0);
     }
 
-    eRetStatus = eglGetConfigs(egl_display, configs, 2, &config_count);
-    if (eRetStatus != EGL_TRUE) {
-        debugPrintf("Error: eglGetConfigs\n");
-        exit(0);
-    }
-
-    eRetStatus = eglChooseConfig(egl_display, cfg_attribs, configs, 2, &config_count);
+    eRetStatus = eglChooseConfig(egl_display, cfg_attribs, &config, 1, &config_count);
     if (eRetStatus != EGL_TRUE) {
         debugPrintf("Error: eglChooseConfig\n");
         exit(0);
@@ -86,13 +84,13 @@ int init_egl() {
     win.numFlipBuffers = 2;
     win.flipChainThrdAffinity = 0;
 
-    egl_surface = eglCreateWindowSurface(egl_display, configs[0], &win, NULL);
+    egl_surface = eglCreateWindowSurface(egl_display, config, &win, NULL);
     if (egl_surface == EGL_NO_SURFACE) {
         debugPrintf("Error: eglCreateWindowSurface\n");
         exit(0);
     }
 
-    egl_context = eglCreateContext(egl_display, configs[0], EGL_NO_CONTEXT, ctx_attribs);
+    egl_context = eglCreateContext(egl_display, config, EGL_NO_CONTEXT, ctx_attribs);
     if (egl_context == EGL_NO_CONTEXT) {
         debugPrintf("Error: eglCreateContext\n");
         exit(0);
@@ -133,6 +131,10 @@ eglCreateWindowSurface_hook(EGLDisplay dpy, EGLConfig config, EGLNativeWindowTyp
 }
 
 EGLDisplay eglGetDisplay_hook(EGLNativeDisplayType display_id) {
+    // init EGL
+    debugPrintf("eglGetDisplay_hook triggered, init EGL");
+    init_egl();
+
     return egl_display;
 }
 
@@ -152,6 +154,7 @@ GLint glGetUniformLocation_hook(GLuint prog, const GLchar *name) {
     if (!strcmp(name, "texture")) {
         name = "texture0";
     }
+    debugPrintf("glGetUniformLocation(%d, %s)\n", prog, name);
     return glGetUniformLocation(prog, name);
 }
 
@@ -180,4 +183,9 @@ void glDrawArrays_hook(GLenum mode, GLint first, GLsizei count) {
 void glGenTextures_hook(GLsizei n, GLuint *textures) {
     glGenTextures(n, textures);
     debugPrintf("glGenTextures(%d, %x) = %d\n", n, textures, *textures);
+}
+
+void glCompileShader_hook(GLuint shader) {
+    debugPrintf("glCompileShader(%d)\n", shader);
+    glCompileShader(shader);
 }

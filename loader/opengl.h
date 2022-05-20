@@ -33,5 +33,6 @@ void glViewport_hook(GLint x, GLint y, GLsizei width, GLsizei height);
 void glBindTexture_hook(GLenum target, GLuint texture);
 void glDrawArrays_hook(GLenum mode, GLint first, GLsizei count);
 void glGenTextures_hook(GLsizei n, GLuint* textures);
+void glCompileShader_hook(GLuint shader);
 
 #endif //KERO_BLASTER_VITA_OPENGL_H

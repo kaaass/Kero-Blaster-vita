@@ -13,9 +13,10 @@ include("${VITASDK}/share/vita.cmake" REQUIRED)
 set(VITA_APP_NAME "Kero Blaster")
 set(VITA_TITLEID "KEROBLAST")
 set(VITA_VERSION "01.00")
-set(VITA_MKSFOEX_FLAGS "-d ATTRIBUTE2=12")
+set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d PARENTAL_LEVEL=1")
+set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d ATTRIBUTE2=12")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wl,-q,--wrap,memcpy,--wrap,memmove,--wrap,memset -D_GNU_SOURCE -Wall -O3 -mfloat-abi=softfp")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wl,-q,--wrap,memcpy,--wrap,memmove,--wrap,memset -D_GNU_SOURCE -Wall -O3")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 
 add_definitions(-D__psp2__)
@@ -38,14 +39,9 @@ target_link_libraries(Kero-Blaster
         kubridge_stub
         SceAppMgr_stub
         SceAppUtil_stub
-        SceAudio_stub
-        SceAudioIn_stub
         SceCtrl_stub
         SceCommonDialog_stub
         SceDisplay_stub
-        SceKernelDmacMgr_stub
-        SceRazorHud_stub
-        SceRazorCapture_stub
         SceFios2_stub
         SceLibcBridge_stub
         SceSysmodule_stub
@@ -62,7 +58,6 @@ vita_create_vpk(Kero-Blaster.vpk ${VITA_TITLEID} eboot.bin
         VERSION ${VITA_VERSION}
         NAME ${VITA_APP_NAME}
         FILE ${CMAKE_SOURCE_DIR}/sce_sys sce_sys
-        FILE ${CMAKE_SOURCE_DIR}/shader shader
         FILE ${CMAKE_SOURCE_DIR}/module module
         )
 
