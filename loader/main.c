@@ -81,6 +81,11 @@ int fake_load_se(void *se_ctx, char *name, int slot) {
     return 1;
 }
 
+int fake_init_bgm(void *ctx, int a2, int sample_rate, int bits, float a5, float a6) {
+    debugPrintf("fake_init_bgm(%x, ...)\n", ctx);
+    return 1;
+}
+
 void patch_game(void) {
     // patch 0x17dd8 bne -> beq
     uint16_t beq = 0xd018;
@@ -88,6 +93,8 @@ void patch_game(void) {
 
     // todo fix audio
     hook_addr(LOAD_ADDRESS + 0xaeb40 + 1, (uintptr_t) &fake_load_se);
+    hook_addr(LOAD_ADDRESS + 0xae1e8 + 1, (uintptr_t) &fake_init_bgm);
+
 
     // hook_addr(LOAD_ADDRESS + 0xaeb3a + 1, (uintptr_t) &go);
 //    hook_addr(so_symbol(&twom_mod, "__cxa_guard_acquire"), (uintptr_t) &__cxa_guard_acquire);
