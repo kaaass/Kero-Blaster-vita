@@ -106,7 +106,7 @@ void submit_key_event(bool is_key_up, int key_code) {
             event->is_key_event = true;
             event->key_event.is_key_up = is_key_up;
             event->key_event.key_code = key_code;
-            debugPrintf("Trigger key event: up = %d, key = %d\n", is_key_up, key_code);
+            // debugPrintf("Trigger key event: up = %d, key = %d\n", is_key_up, key_code);
         } else {
             debugPrintf("[WARN] event buffer full! pending events will be dropped!\n");
         }

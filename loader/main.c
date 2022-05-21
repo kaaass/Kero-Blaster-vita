@@ -78,8 +78,26 @@ void go() {
 }
 
 int fake_load_se(void *se_ctx, char *name, int slot) {
-    debugPrintf("fake_load_se(ctx = %x, name = '%s', slot = %x)\n", se_ctx, name, slot);
+    debugPrintf("fake_load_se(ctx = %x, name = '%s', slot = %d)\n", se_ctx, name, slot);
+    void **slots = se_ctx + 0x20;
+    char *slot_names = *slots + 0x9 + slot * 56;
+    strcpy(slot_names, name);
     return 1;
+}
+
+int fake_play_se_by_slot(int slot) {
+    debugPrintf("fake_play_se_by_slot(%d)\n", slot);
+    return 0;
+}
+
+int fake_play_se_by_slot_2(int slot) {
+    debugPrintf("fake_play_se_by_slot_2(%d)\n", slot);
+    return 0;
+}
+
+int fake_play_se_by_slot_3(int slot) {
+    debugPrintf("fake_play_se_by_slot_3(%d)\n", slot);
+    return 0;
 }
 
 int fake_init_bgm(void *ctx, int a2, int sample_rate, int bits, float a5, float a6) {
@@ -88,46 +106,18 @@ int fake_init_bgm(void *ctx, int a2, int sample_rate, int bits, float a5, float 
 }
 
 void patch_game(void) {
-    // patch 0x17dd8 bne -> beq
+    // patch 0x17dd8 bne -> beq, for quick debug todo remove me later
     uint16_t beq = 0xd018;
     kuKernelCpuUnrestrictedMemcpy((void *)(LOAD_ADDRESS + 0x17dd8), &beq, sizeof(beq));
 
     // todo fix audio
     hook_addr(LOAD_ADDRESS + 0xaeb40 + 1, (uintptr_t) &fake_load_se);
-    hook_addr(LOAD_ADDRESS + 0xae1e8 + 1, (uintptr_t) &fake_init_bgm);
-
+    hook_addr(LOAD_ADDRESS + 0x1a248 + 1, (uintptr_t) &fake_play_se_by_slot);
+    hook_addr(LOAD_ADDRESS + 0x1a338 + 1, (uintptr_t) &fake_play_se_by_slot_2);
+    hook_addr(LOAD_ADDRESS + 0x1a514 + 1, (uintptr_t) &fake_play_se_by_slot_3);
+    // hook_addr(LOAD_ADDRESS + 0xae1e8 + 1, (uintptr_t) &fake_init_bgm);
 
     // hook_addr(LOAD_ADDRESS + 0xaeb3a + 1, (uintptr_t) &go);
-//    hook_addr(so_symbol(&twom_mod, "__cxa_guard_acquire"), (uintptr_t) &__cxa_guard_acquire);
-//    hook_addr(so_symbol(&twom_mod, "__cxa_guard_release"), (uintptr_t) &__cxa_guard_release);
-//
-//    hook_addr(so_symbol(&twom_mod, "_ZN10FileSystem14IsAbsolutePathEPKc"), (uintptr_t) FileSystem__IsAbsolutePath);
-//    hook_addr(so_symbol(&twom_mod, "_ZN13ShaderManager13GetShaderPathEv"), (uintptr_t) ShaderManager__GetShaderPath);
-//
-//    hook_addr(so_symbol(&twom_mod, "_Z17GetApkAssetOffsetPKcRj"), (uintptr_t) ret0);
-//
-//    TotalMemeorySizeInMB = (int *) so_symbol(&twom_mod, "TotalMemeorySizeInMB");
-//    hook_addr(so_symbol(&twom_mod, "_Z22DeteremineSystemMemoryv"), (uintptr_t) DeteremineSystemMemory);
-//
-//    hook_addr(so_symbol(&twom_mod, "_ZN14GoogleServices10IsSignedInEv"), (uintptr_t) ret0);
-//    hook_addr(so_symbol(&twom_mod, "_ZN26InAppStoreAndroidInterface24IsInAppPurchasePurchasedERK10NameString"),
-//              enable_dlcs ? (uintptr_t) ret1 : (uintptr_t) ret0);
-//
-//    hook_addr(so_symbol(&twom_mod, "_Z12SetGLContextv"), (uintptr_t) ret0);
-//    hook_addr(so_symbol(&twom_mod, "_Z16PresentGLContextv"), (uintptr_t) PresentGLContext);
-//
-//    hook_addr(so_symbol(&twom_mod, "_ZN11GameConsole5PrintEhhPKcz"), (uintptr_t) ret0);
-//    hook_addr(so_symbol(&twom_mod, "_ZN11GameConsole12PrintWarningEhPKcz"), (uintptr_t) ret0);
-//    hook_addr(so_symbol(&twom_mod, "_ZN11GameConsole10PrintErrorEhPKcz"), (uintptr_t) ret0);
-
-    //_Znwj = (void *)so_symbol(&twom_mod, "_Znwj");
-    //CountingSemaphore__Constructor = (void *)so_symbol(&twom_mod, "_ZN17CountingSemaphoreC2Ej");
-    //BaseThread__BeginMessage = (void *)so_symbol(&twom_mod, "_ZN10BaseThread12BeginMessageEjj");
-    //BaseThread__EndMessage = (void *)so_symbol(&twom_mod, "_ZN10BaseThread10EndMessageEv");
-    //BaseThread___ThreadCode = (void *)so_symbol(&twom_mod, "_ZN10BaseThread11_ThreadCodeEv");
-    //hook_addr(so_symbol(&twom_mod, "_ZN10BaseThread4InitEv"), (uintptr_t)BaseThread__Init);
-    //hook_addr(so_symbol(&twom_mod, "_ZN10BaseThread11SetPriorityEi"), (uintptr_t)ret0);
-    //hook_addr(so_symbol(&twom_mod, "_Z18GetCurrentThreadIdv"), (uintptr_t)GetCurrentThreadId);
 }
 
 int check_kubridge(void) {
