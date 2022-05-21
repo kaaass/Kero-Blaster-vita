@@ -44,7 +44,7 @@ DYN_SYMBOL(_ZNSt6__ndk15mutex8try_lockEv, ret0)
 DYN_SYMBOL(_ZNSt6__ndk15mutexD1Ev, ret0)
 
 // todo impl audio
-DYN_SYMBOL(_ZN4oboe18AudioStreamBuilder10openStreamERNSt6__ndk110shared_ptrINS_11AudioStreamEEE, ret0)
+DYN_SYMBOL_DEFAULT(_ZN4oboe18AudioStreamBuilder10openStreamERNSt6__ndk110shared_ptrINS_11AudioStreamEEE)
 // fixme ndk stuff
 DYN_SYMBOL_DEFAULT(_ZNSt6__ndk119__shared_weak_count14__release_weakEv)
 

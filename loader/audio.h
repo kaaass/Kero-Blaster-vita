@@ -1,0 +1,6 @@
+#ifndef KERO_BLASTER_VITA_AUDIO_H
+#define KERO_BLASTER_VITA_AUDIO_H
+
+void patch_audio();
+
+#endif //KERO_BLASTER_VITA_AUDIO_H

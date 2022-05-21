@@ -31,6 +31,7 @@
 #include "dyn_stub.h"
 #include "opengl.h"
 #include "control.h"
+#include "audio.h"
 
 #define debug_flag debugPrintf("%s:%d\n", __FILE__, __LINE__);
 
@@ -72,52 +73,12 @@ int debugPrintf(char *text, ...) {
     return 0;
 }
 
-void go() {
-    debugPrintf("trigger goooooooooooooooo\n");
-    exit(0);
-}
-
-int fake_load_se(void *se_ctx, char *name, int slot) {
-    debugPrintf("fake_load_se(ctx = %x, name = '%s', slot = %d)\n", se_ctx, name, slot);
-    void **slots = se_ctx + 0x20;
-    char *slot_names = *slots + 0x9 + slot * 56;
-    strcpy(slot_names, name);
-    return 1;
-}
-
-int fake_play_se_by_slot(int slot) {
-    debugPrintf("fake_play_se_by_slot(%d)\n", slot);
-    return 0;
-}
-
-int fake_play_se_by_slot_2(int slot) {
-    debugPrintf("fake_play_se_by_slot_2(%d)\n", slot);
-    return 0;
-}
-
-int fake_play_se_by_slot_3(int slot) {
-    debugPrintf("fake_play_se_by_slot_3(%d)\n", slot);
-    return 0;
-}
-
-int fake_init_bgm(void *ctx, int a2, int sample_rate, int bits, float a5, float a6) {
-    debugPrintf("fake_init_bgm(%x, ...)\n", ctx);
-    return 1;
-}
-
 void patch_game(void) {
     // patch 0x17dd8 bne -> beq, for quick debug todo remove me later
     uint16_t beq = 0xd018;
     kuKernelCpuUnrestrictedMemcpy((void *)(LOAD_ADDRESS + 0x17dd8), &beq, sizeof(beq));
 
-    // todo fix audio
-    hook_addr(LOAD_ADDRESS + 0xaeb40 + 1, (uintptr_t) &fake_load_se);
-    hook_addr(LOAD_ADDRESS + 0x1a248 + 1, (uintptr_t) &fake_play_se_by_slot);
-    hook_addr(LOAD_ADDRESS + 0x1a338 + 1, (uintptr_t) &fake_play_se_by_slot_2);
-    hook_addr(LOAD_ADDRESS + 0x1a514 + 1, (uintptr_t) &fake_play_se_by_slot_3);
-    // hook_addr(LOAD_ADDRESS + 0xae1e8 + 1, (uintptr_t) &fake_init_bgm);
-
-    // hook_addr(LOAD_ADDRESS + 0xaeb3a + 1, (uintptr_t) &go);
+    patch_audio();
 }
 
 int check_kubridge(void) {

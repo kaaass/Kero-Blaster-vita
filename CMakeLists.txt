@@ -31,6 +31,7 @@ add_executable(Kero-Blaster
         loader/opengl.c
         loader/control.c
         loader/llvm_next_prime.cpp
+        loader/audio.c
         )
 
 target_link_libraries(Kero-Blaster

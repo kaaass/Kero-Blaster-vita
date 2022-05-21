@@ -249,6 +249,41 @@ STUB_FUNC(dl_unwind_find_exidx)
 STUB_FUNC(_ZNKSt6__ndk120__vector_base_commonILb1EE20__throw_length_errorEv)
 STUB_FUNC(_ZNSt6__ndk119__shared_weak_count14__release_weakEv)
 
+#define CRASH_STUB(name) int name() { \
+                            printf("crash stub: '" #name "' unimplemented\n"); \
+                            return *((uint32_t *) 0); \
+                        }
+
+STUB_FUNC(as_vtable_0)
+STUB_FUNC(as_vtable_1)
+STUB_FUNC(as_vtable_2)
+STUB_FUNC(as_vtable_3)
+STUB_FUNC(as_vtable_4)
+STUB_FUNC(as_vtable_5)
+STUB_FUNC(as_vtable_6)
+STUB_FUNC(as_vtable_7)
+STUB_FUNC(as_vtable_8)
+
+void *fake_vtable_audio_stream[] = {
+    &as_vtable_0,
+    &as_vtable_1,
+    &as_vtable_2,
+    &as_vtable_3,
+    &as_vtable_4,
+    &as_vtable_5,
+    &as_vtable_6,
+    &as_vtable_7,
+    &as_vtable_8,
+};
+
+int _ZN4oboe18AudioStreamBuilder10openStreamERNSt6__ndk110shared_ptrINS_11AudioStreamEEE(void *builder, void**audio_stream) {
+    debugPrintf("openStream(%x, %x)\n", builder, audio_stream);
+    void *result = malloc(0x30);
+    *(uintptr_t *) result = (uintptr_t) &fake_vtable_audio_stream;
+    *audio_stream = result;
+    return 0;
+}
+
 int pthread_create_fake(pthread_t *thread, const void *unused, void *entry, void *arg) {
     return pthread_create(thread, NULL, entry, arg);
 }
