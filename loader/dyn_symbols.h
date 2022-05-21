@@ -38,14 +38,13 @@ DYN_SYMBOL_DEFAULT(_ZNSt6__ndk16chrono12steady_clock3nowEv)
 DYN_SYMBOL(_ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE6resizeEjc, _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE6resizeEjc)
 DYN_SYMBOL_DEFAULT(_ZNKSt6__ndk120__vector_base_commonILb1EE20__throw_length_errorEv)
 DYN_SYMBOL(_ZNSt6__ndk112__next_primeEj, next_prime)
+DYN_SYMBOL(_ZN4oboe18AudioStreamBuilder10openStreamERNSt6__ndk110shared_ptrINS_11AudioStreamEEE, ret0)
+
+// fixme ndk stuff
 DYN_SYMBOL(_ZNSt6__ndk15mutex4lockEv, ret0)
 DYN_SYMBOL(_ZNSt6__ndk15mutex6unlockEv, ret0)
 DYN_SYMBOL(_ZNSt6__ndk15mutex8try_lockEv, ret0)
 DYN_SYMBOL(_ZNSt6__ndk15mutexD1Ev, ret0)
-
-// todo impl audio
-DYN_SYMBOL_DEFAULT(_ZN4oboe18AudioStreamBuilder10openStreamERNSt6__ndk110shared_ptrINS_11AudioStreamEEE)
-// fixme ndk stuff
 DYN_SYMBOL_DEFAULT(_ZNSt6__ndk119__shared_weak_count14__release_weakEv)
 
 DYN_SYMBOL_DEFAULT(AAsset_close)
