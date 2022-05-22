@@ -113,6 +113,49 @@ void _ZNSt6__ndk16chrono12steady_clock3nowEv(uint64_t *clock) {
     // debugPrintf("_ZNSt6chrono3_V212steady_clock3nowEv = %llu\n", clock);
 }
 
+static void* create_mutex(void **mutex) {
+    void *p_mutex = malloc(sizeof(SceKernelLwMutexWork));
+    int ret = sceKernelCreateLwMutex(p_mutex, "", 0, 0, NULL);
+    if (ret < 0) {
+        debugPrintf("sceKernelCreateLwMutex failed: 0x%08x\n", ret);
+        exit(1);
+    }
+    *mutex = p_mutex;
+    return p_mutex;
+}
+
+void _ZNSt6__ndk15mutex4lockEv(void **mutex) {
+    void *p_mutex = *mutex;
+    if (p_mutex == NULL) {
+        p_mutex = create_mutex(mutex);
+    }
+    sceKernelLockLwMutex(p_mutex, 1, NULL);
+}
+
+void _ZNSt6__ndk15mutex6unlockEv(void **mutex) {
+    void *p_mutex = *mutex;
+    if (p_mutex) {
+        sceKernelUnlockLwMutex(p_mutex, 1);
+    }
+}
+
+void _ZNSt6__ndk15mutex8try_lockEv(void **mutex) {
+    void *p_mutex = *mutex;
+    if (p_mutex == NULL) {
+        p_mutex = create_mutex(mutex);
+    }
+    sceKernelTryLockLwMutex(p_mutex, 1);
+}
+
+void _ZNSt6__ndk15mutexD1Ev(void **mutex) {
+    void *p_mutex = *mutex;
+    if (p_mutex) {
+        sceKernelDeleteLwMutex(p_mutex);
+        free(p_mutex);
+        *mutex = NULL;
+    }
+}
+
 int __android_log_print(int prio, const char *tag, const char *fmt, ...) {
 #ifdef DEBUG
     va_list list;
