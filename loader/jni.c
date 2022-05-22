@@ -1,64 +1,90 @@
-#include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-#include <psp2/message_dialog.h>
 #include "main.h"
 #include "jni.h"
 #include "dialog.h"
+#include "so_util.h"
 
 char fake_vm[0x1000];
 char fake_env[0x1000];
 ANativeActivity fake_activity;
 ANativeActivityCallbacks fake_callbacks;
 
-enum MethodIDs {
-    UNKNOWN = 0,
-    messageBox,
-} MethodIDs;
+typedef enum {
+    JNI_METHOD_UNKNOWN = 0,
+    JNI_METHOD_messageBox,
+} jni_method_id_t;
 
 typedef struct {
     char *name;
-    enum MethodIDs id;
-} NameToMethodID;
+    jni_method_id_t id;
+} jni_method_mapping_t;
 
-static NameToMethodID name_to_method_ids[] = {
-        {"messageBox",            messageBox},
+typedef enum {
+    JNI_FIELD_UNKNOWN = 0,
+    JNI_FIELD_versionName,
+} jni_field_id_t;
+
+typedef struct {
+    char *name;
+    jni_field_id_t id;
+} jni_field_mapping_t;
+
+static jni_method_mapping_t method_mappings[] = {
+        {"messageBox", JNI_METHOD_messageBox},
 };
+
+static jni_field_mapping_t field_mappings[] = {
+        {"versionName", JNI_FIELD_versionName},
+};
+
+jni_method_id_t jni_get_method_by_name(const char *name) {
+    for (int i = 0; i < sizeof(method_mappings) / sizeof(jni_method_mapping_t); i++) {
+        if (strcmp(name, method_mappings[i].name) == 0) {
+            return method_mappings[i].id;
+        }
+    }
+    return JNI_METHOD_UNKNOWN;
+}
+
+jni_field_id_t jni_get_field_by_name(const char *name) {
+    for (int i = 0; i < sizeof(field_mappings) / sizeof(jni_field_mapping_t); i++) {
+        if (strcmp(name, field_mappings[i].name) == 0) {
+            return field_mappings[i].id;
+        }
+    }
+    return JNI_FIELD_UNKNOWN;
+}
 
 int GetMethodID(void *env, void *class, const char *name, const char *sig) {
     debugPrintf("GetMethodID: %s\n", name);
-
-    for (int i = 0; i < sizeof(name_to_method_ids) / sizeof(NameToMethodID); i++) {
-        if (strcmp(name, name_to_method_ids[i].name) == 0) {
-            return name_to_method_ids[i].id;
-        }
-    }
-
-    return UNKNOWN;
+    return jni_get_method_by_name(name);
 }
 
 int GetStaticMethodID(void *env, void *class, const char *name, const char *sig) {
     debugPrintf("GetStaticMethodID: %s\n", name);
+    return jni_get_method_by_name(name);
+}
 
-    for (int i = 0; i < sizeof(name_to_method_ids) / sizeof(NameToMethodID); i++) {
-        if (strcmp(name, name_to_method_ids[i].name) == 0)
-            return name_to_method_ids[i].id;
-    }
-
-    return UNKNOWN;
+int GetFieldID(void *env, void *class, char *name, char *type) {
+    debugPrintf("GetFieldID: %s\n", name);
+    return jni_get_field_by_name(name);
 }
 
 void CallVoidMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
     debugPrintf("CallVoidMethodV: methodID = %d\n", methodID);
 }
 
-int GetFieldID(void *env, void *class, char *name, char *type) {
-    debugPrintf("GetFieldID: %s\n", name);
-    return 0;
-}
-
 void *GetObjectField(void *env, void *obj, int fieldID) {
     debugPrintf("GetObjectField: fieldID = %d\n", fieldID);
+    switch (fieldID) {
+        case JNI_FIELD_versionName:
+#if defined(GAME_VERSION) && defined(VITA_VERSION)
+            return (void *) GAME_VERSION "_" VITA_VERSION;
+#else
+            return (void *) "unknown";
+#endif
+    }
     return "";
 }
 
@@ -74,7 +100,7 @@ bool CallBooleanMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
 int CallIntMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
     debugPrintf("CallIntMethodV: methodID = %d\n", methodID);
     switch (methodID) {
-        case messageBox: {
+        case JNI_METHOD_messageBox: {
             char *title = *(char **) &args[0];
             char *content = *(char **) &args[1];
             bool show_cancel = *(bool *) &args[2];
@@ -132,8 +158,6 @@ int GetEnv(void *vm, void **env, int r2) {
     *env = fake_env;
     return 0;
 }
-
-
 
 void init_jni_env() {
     memset(fake_vm, 'A', sizeof(fake_vm));

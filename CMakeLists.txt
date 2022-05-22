@@ -13,6 +13,7 @@ include("${VITASDK}/share/vita.cmake" REQUIRED)
 set(VITA_APP_NAME "Kero Blaster")
 set(VITA_TITLEID "KEROBLAST")
 set(VITA_VERSION "01.00")
+set(GAME_VERSION "1.6.0")
 set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d PARENTAL_LEVEL=1")
 set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d ATTRIBUTE2=12")
 
@@ -20,6 +21,8 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wl,-q,--wrap,memcpy,--wrap,memmove,--wra
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 
 add_definitions(-D__psp2__)
+add_definitions(-DGAME_VERSION="${GAME_VERSION}")
+add_definitions(-DVITA_VERSION="${VITA_VERSION}")
 
 add_executable(Kero-Blaster
         loader/main.c
