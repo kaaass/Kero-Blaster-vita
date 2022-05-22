@@ -74,10 +74,6 @@ int debugPrintf(char *text, ...) {
 }
 
 void patch_game(void) {
-    // patch 0x17dd8 bne -> beq, for quick debug todo remove me later
-    uint16_t beq = 0xd018;
-    kuKernelCpuUnrestrictedMemcpy((void *)(LOAD_ADDRESS + 0x17dd8), &beq, sizeof(beq));
-
     patch_audio();
 }
 
