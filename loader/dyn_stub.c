@@ -48,6 +48,7 @@
 #include "control.h"
 #include "so_util.h"
 #include "llvm_next_prime.h"
+#include "sfp.h"
 
 #define STUB_FUNC_FULL(name, rettype, retval, ...) rettype name(__VARGS__) { \
                             printf("stub: '" #name "' unimplemented\n"); \
@@ -430,6 +431,7 @@ int pthread_cond_wait_fake(pthread_cond_t **cnd, pthread_mutex_t **mtx) {
 
 /*
  * Softfp wrapper
+ * todo recheck all symbols and rewrite following with sfp.h
  */
 
 int64_t atan_sfp(int64_t a1) {
@@ -522,6 +524,11 @@ int sinf_sfp(int a1) {
     ires = *(int *)(&fres);
 
     return ires;
+}
+
+sfp_double difftime_sfp(time_t a, time_t b) {
+    double result = difftime(a, b);
+    return double2sfp(result);
 }
 
 void glClearColor_sfp(int i_red, int i_green, int i_blue, int i_alpha) {
