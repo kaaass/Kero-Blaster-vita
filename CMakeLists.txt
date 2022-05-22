@@ -31,7 +31,7 @@ add_executable(Kero-Blaster
         loader/opengl.c
         loader/control.c
         loader/llvm_next_prime.cpp
-        loader/audio.c
+        loader/audio.cpp
         )
 
 target_link_libraries(Kero-Blaster
@@ -39,6 +39,9 @@ target_link_libraries(Kero-Blaster
         m
         stdc++
         mathneon
+        oboe
+        OpenSLES
+        sndfile
         kubridge_stub
         SceAppMgr_stub
         SceAppUtil_stub
@@ -51,6 +54,7 @@ target_link_libraries(Kero-Blaster
         ScePower_stub
         SceTouch_stub
         SceVshBridge_stub
+        SceAudio_stub
         libIMGEGL_stub_weak
         libgpu_es4_ext_stub_weak
         libGLESv2_stub_weak
