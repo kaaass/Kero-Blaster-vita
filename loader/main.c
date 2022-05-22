@@ -92,10 +92,10 @@ int main(int argc, char *argv[]) {
     sceCtrlSetSamplingModeExt(SCE_CTRL_MODE_ANALOG_WIDE);
     sceTouchSetSamplingState(SCE_TOUCH_PORT_FRONT, SCE_TOUCH_SAMPLING_STATE_START);
 
-    scePowerSetArmClockFrequency(444);
+    scePowerSetArmClockFrequency(333);
     scePowerSetBusClockFrequency(222);
-    scePowerSetGpuClockFrequency(222);
-    scePowerSetGpuXbarClockFrequency(166);
+    scePowerSetGpuClockFrequency(166);
+    scePowerSetGpuXbarClockFrequency(111);
 
     if (check_kubridge() < 0)
         fatal_error("Error kubridge.skprx is not installed.");
