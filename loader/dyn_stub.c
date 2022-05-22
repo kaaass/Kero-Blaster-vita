@@ -431,99 +431,49 @@ int pthread_cond_wait_fake(pthread_cond_t **cnd, pthread_mutex_t **mtx) {
 
 /*
  * Softfp wrapper
- * todo recheck all symbols and rewrite following with sfp.h
  */
 
-int64_t atan_sfp(int64_t a1) {
-    double fa1;
-    int64_t ires;
-
-    fa1 = *(double *)(&a1);
-    double fres = atan(fa1);
-    ires = *(int64_t *)(&fres);
-
-    return ires;
+sfp_double atan_sfp(sfp_double a1) {
+    double result = atan(sfp2double(a1));
+    return double2sfp(result);
 }
 
-int64_t ceil_sfp(int64_t a1) {
-    double fa1;
-    int64_t ires;
-
-    fa1 = *(double *)(&a1);
-    double fres = ceil(fa1);
-    ires = *(int64_t *)(&fres);
-
-    return ires;
+sfp_double ceil_sfp(sfp_double a1) {
+    double result = ceil(sfp2double(a1));
+    return double2sfp(result);
 }
 
-int ceilf_sfp(int a1) {
-    float fa1;
-    int ires;
-
-    fa1 = *(float *)(&a1);
-    float fres = ceilf(fa1);
-    ires = *(int *)(&fres);
-
-    return ires;
+sfp_float ceilf_sfp(sfp_float a1) {
+    float result = ceilf(sfp2float(a1));
+    return float2sfp(result);
 }
 
-int cosf_sfp(int a1) {
-    float fa1;
-    int ires;
-
-    fa1 = *(float *)(&a1);
-    float fres = cosf(fa1);
-    ires = *(int *)(&fres);
-
-    return ires;
+sfp_float cosf_sfp(sfp_float a1) {
+    float result = cosf(sfp2float(a1));
+    return float2sfp(result);
 }
 
-int powf_sfp(int a1, int a2) {
-    float fa1, fa2;
-    int ires;
-
-    fa1 = *(float *)(&a1);
-    fa2 = *(float *)(&a2);
-    float fres = powf(fa1, fa2);
-    ires = *(int *)(&fres);
-
-    return ires;
+sfp_float powf_sfp(sfp_float a1, sfp_float a2) {
+    float result = powf(sfp2float(a1), sfp2float(a2));
+    return float2sfp(result);
 }
 
-int64_t sin_sfp(int64_t a1) {
-    double fa1;
-    int64_t ires;
-
-    fa1 = *(double *)(&a1);
-    double fres = sin(fa1);
-    ires = *(int64_t *)(&fres);
-
-    return ires;
+sfp_double sin_sfp(sfp_double a1) {
+    double result = sin(sfp2double(a1));
+    return double2sfp(result);
 }
 
-void sincos_sfp(int64_t a, double *b, double *c) {
-    double fa1;
-
-    fa1 = *(double *)(&a);
-    sincos(fa1, b, c);
+void sincos_sfp(sfp_double a, double *b, double *c) {
+    sincos(sfp2double(a), b, c);
 }
 
-void sincosf_sfp(float a, float *b, float *c) {
-    float fa1;
-
-    fa1 = *(float *)(&a);
-    sincosf(fa1, b, c);
+void sincosf_sfp(sfp_float a, float *b, float *c) {
+    sincosf(sfp2float(a), b, c);
 }
 
-int sinf_sfp(int a1) {
-    float fa1;
-    int ires;
-
-    fa1 = *(float *)(&a1);
-    float fres = sinf(fa1);
-    ires = *(int *)(&fres);
-
-    return ires;
+sfp_float sinf_sfp(sfp_float a1) {
+    float result = sinf(sfp2float(a1));
+    return float2sfp(result);
 }
 
 sfp_double difftime_sfp(time_t a, time_t b) {
@@ -531,21 +481,17 @@ sfp_double difftime_sfp(time_t a, time_t b) {
     return double2sfp(result);
 }
 
-void glClearColor_sfp(int i_red, int i_green, int i_blue, int i_alpha) {
-    float red, green, blue, alpha;
-
-    red = *(float *)(&i_red);
-    green = *(float *)(&i_green);
-    blue = *(float *)(&i_blue);
-    alpha = *(float *)(&i_alpha);
-    glClearColor(red, green, blue, alpha);
+sfp_double strtod_sfp(const char *n, char **end) {
+    double result = strtod(n, end);
+    return double2sfp(result);
 }
 
-void glTexParameterf_sfp(GLenum target, GLenum pname, int i_param) {
-    float param;
+void glClearColor_sfp(sfp_float red, sfp_float green, sfp_float blue, sfp_float alpha) {
+    glClearColor(sfp2float(red), sfp2float(green), sfp2float(blue), sfp2float(alpha));
+}
 
-    param = *(float *)(&i_param);
-    glTexParameterf(target, pname, param);
+void glTexParameterf_sfp(GLenum target, GLenum pname, sfp_float param) {
+    glTexParameterf(target, pname, sfp2float(param));
 }
 
 /*
