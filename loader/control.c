@@ -174,7 +174,20 @@ _Noreturn int ctrl_thread(SceSize args, void *argp) {
         sceCtrlPeekBufferPositiveExt2(0, &pad, 1);
 
         old_buttons = current_buttons;
+
         current_buttons = pad.buttons;
+        // add left joystick mapping
+        if (pad.lx < 80) {
+            current_buttons |= SCE_CTRL_LEFT;
+        } else if (pad.lx > 170) {
+            current_buttons |= SCE_CTRL_RIGHT;
+        }
+        if (pad.ly < 80) {
+            current_buttons |= SCE_CTRL_UP;
+        } else if (pad.ly > 170) {
+            current_buttons |= SCE_CTRL_DOWN;
+        }
+
         down_buttons = current_buttons & ~old_buttons;
         up_buttons = ~current_buttons & old_buttons;
 

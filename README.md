@@ -8,6 +8,7 @@ Kera Blaster (Android version) port for PS VITA
 - [X] input/controll
   - [X] keycode
   - [X] touch screen
+  - [X] (left) joystick
 - [X] audio
   - [X] se
   - [X] bgm
