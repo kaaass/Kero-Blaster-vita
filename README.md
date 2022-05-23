@@ -28,8 +28,9 @@ In order to properly install the game, you'll have to follow these steps precise
   or by using an apk extractor you can find in the play store. The apk can be extracted with
   whatever Zip extractor you prefer (eg: WinZip, WinRar, etc...) since apk is basically a zip 
   file. You can rename `.apk` to `.zip` to open them with your default zip extractor.
+- Create a folder `kero` under `ux0:data`
 - Open the apk with your zip explorer, extract the `assets` folder from your `.apk` file to 
-  `ux0:data` and rename it to `kero`. The result would be `ux0:data/kero/`
+  `ux0:data/kero`. The result would be `ux0:data/kero/assets`
 - Still in the apk, extract the file `libpxgame.so` from the `lib/armeabi-v7a` folder to 
   `ux0:data/kero`.
 - Install [Kero-Blaster.vpk](https://github.com/kaaass/Kero-Blaster-vita/releases) on your *PS Vita*.
@@ -68,7 +69,7 @@ cmake .. && make
 
 ## Credits
 
-- TheFloW for [twom_vita](https://github.com/TheOfficialFloW/twom_vita#readme), which is used
+- TheFloW, Rinnegatamante for [twom_vita](https://github.com/TheOfficialFloW/twom_vita#readme), which is used
   as the code base of this project
 - Other existing open source Android vita ports projects
 - GrapheneCt for PVR_PSP2, which is the graphic backend in this project
