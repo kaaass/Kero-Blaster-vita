@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 
+set(TITLE_LANG "en" CACHE STRING "Language of title")
+set_property(CACHE TITLE_LANG PROPERTY STRINGS en zh-CN)
+
 if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if (DEFINED ENV{VITASDK})
         set(CMAKE_TOOLCHAIN_FILE "$ENV{VITASDK}/share/vita.toolchain.cmake" CACHE PATH "toolchain file")
@@ -10,7 +13,13 @@ endif ()
 
 project(Kero-Blaster_vita C CXX)
 include("${VITASDK}/share/vita.cmake" REQUIRED)
-set(VITA_APP_NAME "Kero Blaster")
+
+if (TITLE_LANG STREQUAL "zh-CN")
+    set(VITA_APP_NAME "青蛙爆破者")
+else ()
+    set(VITA_APP_NAME "Kero Blaster")
+endif()
+
 set(VITA_TITLEID "KEROBLAST")
 set(VITA_VERSION "01.00")
 set(GAME_VERSION "1.6.0")
@@ -67,7 +76,9 @@ vita_create_self(eboot.bin Kero-Blaster UNSAFE)
 vita_create_vpk(Kero-Blaster.vpk ${VITA_TITLEID} eboot.bin
         VERSION ${VITA_VERSION}
         NAME ${VITA_APP_NAME}
+        # Live area
         FILE ${CMAKE_SOURCE_DIR}/sce_sys sce_sys
+        # User modules
         FILE ${CMAKE_SOURCE_DIR}/module module
         )
 
