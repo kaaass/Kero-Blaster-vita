@@ -1,45 +1,26 @@
-#include <psp2/io/fcntl.h>
+/* dyn_stub.c -- Stub function for dynamic symbols
+ *
+ * Copyright (C) 2022 KAAAsS, Andy Nguyen
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
 #include <psp2/kernel/clib.h>
 #include <psp2/kernel/threadmgr.h>
-#include <psp2/appmgr.h>
-#include <psp2/apputil.h>
-#include <psp2/power.h>
-#include <psp2/rtc.h>
 #include <psp2/touch.h>
-#include <kubridge.h>
-
-#include <malloc.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <wchar.h>
-#include <wctype.h>
-
 #include <math.h>
-#include <math_neon.h>
-
 #include <errno.h>
-#include <ctype.h>
-#include <setjmp.h>
-#include <sys/time.h>
 #include <sys/stat.h>
-#include <psp2/io/stat.h>
-#include <dirent.h>
-#include <sys/socket.h>
-#include <sys/fcntl.h>
-#include <netdb.h>
-#include <sys/poll.h>
-#include <locale.h>
-#include <psp2/ctrl.h>
-#include <stdbool.h>
 #include <sys/syslimits.h>
-#include <EGL/eglplatform.h>
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
 #include <assert.h>
 
 #include "main.h"
@@ -54,7 +35,7 @@
                             printf("stub: '" #name "' unimplemented\n"); \
                             return (retval); \
                         }
-#define STUB_FUNC(name) STUB_FUNC_FULL(name, void *, NULL)
+#define STUB_FUNC(name) STUB_FUNC_FULL(name, void *, NULL, void)
 
 extern void *__cxa_atexit;
 extern void *__cxa_finalize;
@@ -114,7 +95,7 @@ void _ZNSt6__ndk16chrono12steady_clock3nowEv(uint64_t *clock) {
     // debugPrintf("_ZNSt6chrono3_V212steady_clock3nowEv = %llu\n", clock);
 }
 
-static void* create_mutex(void **mutex) {
+static void *create_mutex(void **mutex) {
     void *p_mutex = malloc(sizeof(SceKernelLwMutexWork));
     int ret = sceKernelCreateLwMutex(p_mutex, "", 0, 0, NULL);
     if (ret < 0) {
@@ -180,7 +161,7 @@ int __android_log_write(int prio, const char *tag, const char *text) {
     return 0;
 }
 
-int pipe (int fds[2]) {
+int pipe(int fds[2]) {
     fds[0] = 114;
     fds[1] = 514;
     printf("stub: create pipe %d <-> %d\n", fds[0], fds[1]);
@@ -308,7 +289,7 @@ int pthread_mutex_init_fake(pthread_mutex_t **uid,
     if (!m)
         return -1;
 
-    const int recursive = (mutexattr && *(const int *)mutexattr == 1);
+    const int recursive = (mutexattr && *(const int *) mutexattr == 1);
     *m = recursive ? PTHREAD_RECURSIVE_MUTEX_INITIALIZER
                    : PTHREAD_MUTEX_INITIALIZER;
 
@@ -324,7 +305,7 @@ int pthread_mutex_init_fake(pthread_mutex_t **uid,
 }
 
 int pthread_mutex_destroy_fake(pthread_mutex_t **uid) {
-    if (uid && *uid && (uintptr_t)*uid > 0x8000) {
+    if (uid && *uid && (uintptr_t) *uid > 0x8000) {
         pthread_mutex_destroy(*uid);
         free(*uid);
         *uid = NULL;
@@ -336,13 +317,13 @@ int pthread_mutex_lock_fake(pthread_mutex_t **uid) {
     int ret = 0;
     if (!*uid) {
         ret = pthread_mutex_init_fake(uid, NULL);
-    } else if ((uintptr_t)*uid == 0x4000) {
+    } else if ((uintptr_t) *uid == 0x4000) {
         pthread_mutexattr_t attr;
         pthread_mutexattr_init(&attr);
         pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
         ret = pthread_mutex_init_fake(uid, &attr);
         pthread_mutexattr_destroy(&attr);
-    } else if ((uintptr_t)*uid == 0x8000) {
+    } else if ((uintptr_t) *uid == 0x8000) {
         pthread_mutexattr_t attr;
         pthread_mutexattr_init(&attr);
         pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK);
@@ -358,13 +339,13 @@ int pthread_mutex_unlock_fake(pthread_mutex_t **uid) {
     int ret = 0;
     if (!*uid) {
         ret = pthread_mutex_init_fake(uid, NULL);
-    } else if ((uintptr_t)*uid == 0x4000) {
+    } else if ((uintptr_t) *uid == 0x4000) {
         pthread_mutexattr_t attr;
         pthread_mutexattr_init(&attr);
         pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
         ret = pthread_mutex_init_fake(uid, &attr);
         pthread_mutexattr_destroy(&attr);
-    } else if ((uintptr_t)*uid == 0x8000) {
+    } else if ((uintptr_t) *uid == 0x8000) {
         pthread_mutexattr_t attr;
         pthread_mutexattr_init(&attr);
         pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK);
@@ -378,7 +359,7 @@ int pthread_mutex_unlock_fake(pthread_mutex_t **uid) {
 
 int pthread_mutex_trylock_fake(pthread_mutex_t **uid) {
     int ret = -1;
-    if (uid && *uid && (uintptr_t)*uid > 0x8000) {
+    if (uid && *uid && (uintptr_t) *uid > 0x8000) {
         ret = pthread_mutex_trylock(*uid);
     } else {
         debugPrintf("[WARN] pthread_mutex_trylock_fake unimplement branch!");
@@ -532,7 +513,9 @@ static so_default_dynlib default_dynlib[] = {
 #define DYN_SYMBOL(name, sym) {#name, (uintptr_t) &(sym)},
 #endif
 #define DYN_SYMBOL_DATA(name, sym) {#name, (uintptr_t) &(sym)},
+
 #include "dyn_symbols.h"
+
 #undef DYN_SYMBOL
 #undef DYN_SYMBOL_DATA
 };

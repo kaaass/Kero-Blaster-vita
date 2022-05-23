@@ -1,12 +1,17 @@
-#include <psp2common/types.h>
+/* opengl.c -- OpenGLES & EGL patch
+ *
+ * Copyright (C) 2022 KAAAsS
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
 #include <stddef.h>
 #include <psp2/kernel/modulemgr.h>
 #include <gpu_es4/psp2_pvr_hint.h>
 #include <stdlib.h>
-#include <string.h>
 #include "opengl.h"
-
-int debugPrintf(char *text, ...);
+#include "main.h"
 
 static EGLDisplay egl_display;
 static EGLSurface egl_surface;
@@ -137,7 +142,3 @@ EGLDisplay eglGetDisplay_hook(EGLNativeDisplayType display_id) {
 
     return egl_display;
 }
-
-/*
- * OpenGL Hooks
- */

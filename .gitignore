@@ -9,3 +9,5 @@ build/*
 cmake-*
 .idea
 work
+module
+!module/.gitkeep

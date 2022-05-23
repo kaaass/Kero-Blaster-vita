@@ -1,7 +1,7 @@
 #ifndef __SO_UTIL_H__
 #define __SO_UTIL_H__
 
-#include "elf.h"
+#include <elf.h>
 
 #if defined(__cplusplus)
 extern "C" {

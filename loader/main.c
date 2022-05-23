@@ -1,6 +1,6 @@
-/* main.c -- This War of Mine .so loader
+/* main.c -- Kero Blaster .so loader
  *
- * Copyright (C) 2021 Andy Nguyen
+ * Copyright (C) 2022 KAAAsS
  *
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
@@ -18,22 +18,16 @@
 #include <psp2/io/stat.h>
 #include <psp2/ctrl.h>
 #include <malloc.h>
-#include <kubridge.h>
-#include <stdlib.h>
-#include <EGL/egl1_4.h>
 
 #include "main.h"
 #include "config.h"
 #include "dialog.h"
 #include "so_util.h"
-#include "sha1.h"
 #include "jni.h"
 #include "dyn_stub.h"
 #include "opengl.h"
 #include "control.h"
 #include "audio.h"
-
-#define debug_flag debugPrintf("%s:%d\n", __FILE__, __LINE__);
 
 __attribute__((unused)) int _newlib_heap_size_user = MEMORY_NEWLIB_MB * 1024 * 1024; // NOLINT(bugprone-reserved-identifier)
 __attribute__((unused)) unsigned int _pthread_stack_default_user = 1 * 1024 * 1024; // NOLINT(bugprone-reserved-identifier)
@@ -41,15 +35,15 @@ __attribute__((unused)) unsigned int sceLibcHeapSize = 12 * 1024 * 1024;
 
 so_module kero_mod;
 
-void *__wrap_memcpy(void *dest, const void *src, size_t n) {
+__attribute__((unused)) void *__wrap_memcpy(void *dest, const void *src, size_t n) {
     return sceClibMemcpy(dest, src, n);
 }
 
-void *__wrap_memmove(void *dest, const void *src, size_t n) {
+__attribute__((unused)) void *__wrap_memmove(void *dest, const void *src, size_t n) {
     return sceClibMemmove(dest, src, n);
 }
 
-void *__wrap_memset(void *s, int c, size_t n) {
+__attribute__((unused)) void *__wrap_memset(void *s, int c, size_t n) {
     return sceClibMemset(s, c, n);
 }
 

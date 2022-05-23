@@ -37,7 +37,6 @@ add_executable(Kero-Blaster
         loader/main.c
         loader/dialog.c
         loader/so_util.c
-        loader/sha1.c
         loader/jni.c
         loader/dyn_stub.c
         loader/opengl.c
@@ -79,7 +78,11 @@ vita_create_vpk(Kero-Blaster.vpk ${VITA_TITLEID} eboot.bin
         # Live area
         FILE ${CMAKE_SOURCE_DIR}/sce_sys sce_sys
         # User modules
-        FILE ${CMAKE_SOURCE_DIR}/module module
+        FILE ${CMAKE_SOURCE_DIR}/module/libGLESv2.suprx module/libGLESv2.suprx
+        FILE ${CMAKE_SOURCE_DIR}/module/libgpu_es4_ext.suprx module/libgpu_es4_ext.suprx
+        FILE ${CMAKE_SOURCE_DIR}/module/libIMGEGL.suprx module/libIMGEGL.suprx
+        FILE ${CMAKE_SOURCE_DIR}/module/libpvr2d.suprx module/libpvr2d.suprx
+        FILE ${CMAKE_SOURCE_DIR}/module/libpvrPSP2_WSEGL.suprx module/libpvrPSP2_WSEGL.suprx
         )
 
 add_custom_target(launch

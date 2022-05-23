@@ -1,3 +1,11 @@
+/* jni.c -- JNI hooks
+ *
+ * Copyright (C) 2022 KAAAsS, Andy Nguyen
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
 #include <string.h>
 #include <stdbool.h>
 #include "main.h"
@@ -212,6 +220,6 @@ void jni_load() {
     init_native_activity();
 
     void (*ANativeActivity_onCreate)(ANativeActivity *, void *, size_t) =
-        (void *) so_symbol(&kero_mod, "ANativeActivity_onCreate");
+    (void *) so_symbol(&kero_mod, "ANativeActivity_onCreate");
     ANativeActivity_onCreate(&fake_activity, NULL, 0);
 }

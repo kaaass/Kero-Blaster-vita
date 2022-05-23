@@ -1,3 +1,11 @@
+/* control.c -- Control stubs, event queue and control thread
+ *
+ * Copyright (C) 2022 KAAAsS
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
 #include <assert.h>
 #include <psp2/ctrl.h>
 #include <psp2/kernel/threadmgr.h>
@@ -6,18 +14,18 @@
 #include "main.h"
 
 enum {
-    AKEYCODE_DPAD_UP         = 19,
-    AKEYCODE_DPAD_DOWN       = 20,
-    AKEYCODE_DPAD_LEFT       = 21,
-    AKEYCODE_DPAD_RIGHT      = 22,
-    AKEYCODE_A               = 29,
-    AKEYCODE_S               = 47,
-    AKEYCODE_X               = 52,
-    AKEYCODE_Z               = 54,
-    AKEYCODE_ESCAPE          = 111,
-    AKEYCODE_F1              = 131,
-    AKEYCODE_F2              = 132,
-    AKEYCODE_F3              = 133,
+    AKEYCODE_DPAD_UP = 19,
+    AKEYCODE_DPAD_DOWN = 20,
+    AKEYCODE_DPAD_LEFT = 21,
+    AKEYCODE_DPAD_RIGHT = 22,
+    AKEYCODE_A = 29,
+    AKEYCODE_S = 47,
+    AKEYCODE_X = 52,
+    AKEYCODE_Z = 54,
+    AKEYCODE_ESCAPE = 111,
+    AKEYCODE_F1 = 131,
+    AKEYCODE_F2 = 132,
+    AKEYCODE_F3 = 133,
 };
 
 typedef struct {
@@ -26,18 +34,18 @@ typedef struct {
 } ButtonMapping;
 
 static ButtonMapping mapping[] = {
-        { SCE_CTRL_CROSS,     AKEYCODE_X },
-        { SCE_CTRL_CIRCLE,    AKEYCODE_Z },
-        { SCE_CTRL_SQUARE,    AKEYCODE_S },
-        { SCE_CTRL_TRIANGLE,  AKEYCODE_A },
-        { SCE_CTRL_UP,        AKEYCODE_DPAD_UP },
-        { SCE_CTRL_LEFT,      AKEYCODE_DPAD_LEFT },
-        { SCE_CTRL_RIGHT,     AKEYCODE_DPAD_RIGHT },
-        { SCE_CTRL_DOWN,      AKEYCODE_DPAD_DOWN },
-        { SCE_CTRL_SELECT,    AKEYCODE_ESCAPE },
-        { SCE_CTRL_L1,        AKEYCODE_F1 },
-        { SCE_CTRL_R1,        AKEYCODE_F2 },
-        { SCE_CTRL_START,     AKEYCODE_F3 },
+        {SCE_CTRL_CROSS,    AKEYCODE_X},
+        {SCE_CTRL_CIRCLE,   AKEYCODE_Z},
+        {SCE_CTRL_SQUARE,   AKEYCODE_S},
+        {SCE_CTRL_TRIANGLE, AKEYCODE_A},
+        {SCE_CTRL_UP,       AKEYCODE_DPAD_UP},
+        {SCE_CTRL_LEFT,     AKEYCODE_DPAD_LEFT},
+        {SCE_CTRL_RIGHT,    AKEYCODE_DPAD_RIGHT},
+        {SCE_CTRL_DOWN,     AKEYCODE_DPAD_DOWN},
+        {SCE_CTRL_SELECT,   AKEYCODE_ESCAPE},
+        {SCE_CTRL_L1,       AKEYCODE_F1},
+        {SCE_CTRL_R1,       AKEYCODE_F2},
+        {SCE_CTRL_START,    AKEYCODE_F3},
 };
 
 /*
