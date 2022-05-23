@@ -86,7 +86,11 @@ size_t __strlen_chk(const char *s, size_t s_len) {
 
 void check_last_error() {
     if (*g_is_error) {
+#if defined(DEBUG)
         debugPrintf("[LastError]: %s\n", *last_error);
+#else
+        printf("[LastError]: %s\n", *last_error);
+#endif
     }
 }
 
@@ -139,7 +143,6 @@ void _ZNSt6__ndk15mutexD1Ev(void **mutex) {
 }
 
 int __android_log_print(int prio, const char *tag, const char *fmt, ...) {
-#ifdef DEBUG
     va_list list;
     static char string[0x8000];
 
@@ -147,16 +150,29 @@ int __android_log_print(int prio, const char *tag, const char *fmt, ...) {
     vsprintf(string, fmt, list);
     va_end(list);
 
+#if defined(DEBUG)
     debugPrintf("[LOG] %s: %s\n", tag, string);
     check_last_error();
+#else
+    if (prio >= 4) {
+        // only show INFO and upper in release mode
+        printf("[LOG] %s: %s\n", tag, string);
+        check_last_error();
+    }
 #endif
     return 0;
 }
 
 int __android_log_write(int prio, const char *tag, const char *text) {
-#ifdef DEBUG
-    printf("[LOG] %s: %s\n", tag, text);
+#if defined(DEBUG)
+    debugPrintf("[LOG] %s: %s\n", tag, text);
     check_last_error();
+#else
+    if (prio >= 4) {
+        // only show INFO and upper in release mode
+        printf("[LOG] %s: %s\n", tag, text);
+        check_last_error();
+    }
 #endif
     return 0;
 }
