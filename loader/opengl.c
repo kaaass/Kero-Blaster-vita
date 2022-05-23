@@ -13,6 +13,9 @@
 #include "opengl.h"
 #include "main.h"
 
+int screen_width = 0;
+int screen_height = 0;
+
 static EGLDisplay egl_display;
 static EGLSurface egl_surface;
 static EGLContext egl_context;
@@ -88,6 +91,8 @@ int init_egl() {
     win.windowSize = PSP2_WINDOW_960X544;
     win.numFlipBuffers = 2;
     win.flipChainThrdAffinity = 0;
+    screen_width = 960;
+    screen_height = 544;
 
     egl_surface = eglCreateWindowSurface(egl_display, config, &win, NULL);
     if (egl_surface == EGL_NO_SURFACE) {

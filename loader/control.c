@@ -1,6 +1,6 @@
 /* control.c -- Control stubs, event queue and control thread
  *
- * Copyright (C) 2022 KAAAsS
+ * Copyright (C) 2022 KAAAsS, Andy Nguyen
  *
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
@@ -12,6 +12,7 @@
 #include "control.h"
 #include "config.h"
 #include "main.h"
+#include "opengl.h"
 
 enum {
     AKEYCODE_DPAD_UP = 19,
@@ -111,7 +112,7 @@ void submit_key_event(bool is_key_up, int key_code) {
     {
         event_t *event = event_buf_allocate();
         if (event != NULL) {
-            event->is_key_event = true;
+            event->type = TYPE_KEY;
             event->key_event.is_key_up = is_key_up;
             event->key_event.key_code = key_code;
             // debugPrintf("Trigger key event: up = %d, key = %d\n", is_key_up, key_code);
@@ -122,10 +123,52 @@ void submit_key_event(bool is_key_up, int key_code) {
     event_buf_unlock();
 }
 
+void submit_touch_event(touch_motion_t type, float x, float y) {
+    event_buf_lock();
+    {
+        event_t *event = event_buf_allocate();
+        if (event != NULL) {
+            event->type = TYPE_TOUCH;
+            event->touch_event.motion = type;
+            event->touch_event.x = x;
+            event->touch_event.y = y;
+            // debugPrintf("Trigger touch event: type = %d, x = %f, y = %f\n", type, x, y);
+        } else {
+            debugPrintf("[WARN] event buffer full! pending events will be dropped!\n");
+        }
+    }
+    event_buf_unlock();
+}
+
 _Noreturn int ctrl_thread(SceSize args, void *argp) {
     uint32_t old_buttons = 0, current_buttons = 0, down_buttons = 0, up_buttons = 0;
+    float last_x[2] = {-1, -1};
+    float last_y[2] = {-1, -1};
 
     while (1) {
+        // Touch event
+        SceTouchData touch;
+        sceTouchPeek(SCE_TOUCH_PORT_FRONT, &touch, 1);
+
+        for (int i = 0; i < 2; i++) {
+            if (i < touch.reportNum) {
+                float x = (float) touch.report[i].x * (float) screen_width / 1920.0f;
+                float y = (float) touch.report[i].y * (float) screen_height / 1088.0f;
+
+                if (last_x[i] == -1 || last_y[i] == -1)
+                    submit_touch_event(MOTION_DOWN, x, y);
+                else if (last_x[i] != x || last_y[i] != y)
+                    submit_touch_event(MOTION_MOVE, x, y);
+                last_x[i] = x;
+                last_y[i] = y;
+            } else {
+                if (last_x[i] != -1 || last_y[i] != -1)
+                    submit_touch_event(MOTION_UP, last_x[i], last_y[i]);
+                last_x[i] = -1;
+                last_y[i] = -1;
+            }
+        }
+
         // Key event
         SceCtrlData pad;
         sceCtrlPeekBufferPositiveExt2(0, &pad, 1);
@@ -168,19 +211,40 @@ int process_control_event() {
 }
 
 int AInputEvent_getType(event_t *event) {
-    return event->is_key_event ? 1 : 2;
+    return event->type;
 }
 
 int AMotionEvent_getAction(event_t *event) {
-    if (event->is_key_event) {
+    if (event->type == TYPE_KEY) {
         return event->key_event.is_key_up;
+    } else if (event->type == TYPE_TOUCH) {
+        return event->touch_event.motion;
     } else {
-        // todo
         return -1;
     }
 }
 
 int AKeyEvent_getKeyCode(event_t *event) {
-    assert(event->is_key_event);
+    assert(event->type == TYPE_KEY);
     return event->key_event.key_code;
+}
+
+int AMotionEvent_getPointerCount(event_t *event) {
+    assert(event->type == TYPE_TOUCH);
+    return 1;
+}
+
+int AMotionEvent_getPointerId(event_t *event, size_t index) {
+    assert(index == 0);
+    return 0;
+}
+
+sfp_float AMotionEvent_getX(event_t *event, size_t index) {
+    assert(index == 0);
+    return float2sfp(event->touch_event.x);
+}
+
+sfp_float AMotionEvent_getY(event_t *event, size_t index) {
+    assert(index == 0);
+    return float2sfp(event->touch_event.y);
 }

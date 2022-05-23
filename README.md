@@ -5,9 +5,9 @@ Kera Blaster (Android version) port for PS VITA
 ## Progress
 
 - [X] graphic
-- [ ] input/controll
+- [X] input/controll
   - [X] keycode
-  - [ ] **WIP** touch screen
+  - [X] touch screen
 - [X] audio
   - [X] se
   - [X] bgm

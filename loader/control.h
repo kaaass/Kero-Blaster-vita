@@ -1,18 +1,33 @@
 #include <psp2common/types.h>
 #include <stdbool.h>
+#include "sfp.h"
 
 #ifndef KERO_BLASTER_VITA_CONTROL_H
 #define KERO_BLASTER_VITA_CONTROL_H
 
+typedef enum {
+    TYPE_KEY = 1,
+    TYPE_TOUCH = 2,
+} event_type_t;
+
+typedef enum {
+    MOTION_DOWN = 0,
+    MOTION_UP = 1,
+    MOTION_MOVE = 2,
+    MOTION_CANCEL = 3,
+} touch_motion_t;
+
 typedef struct {
-    bool is_key_event;
+    event_type_t type;
     union {
         struct {
             bool is_key_up;
             int key_code;
         } key_event;
         struct {
-            // todo
+            touch_motion_t motion;
+            float x;
+            float y;
         } touch_event;
     };
 } event_t;
@@ -54,5 +69,13 @@ int AInputEvent_getType(event_t *event);
 int AMotionEvent_getAction(event_t *event);
 
 int AKeyEvent_getKeyCode(event_t *event);
+
+int AMotionEvent_getPointerCount(event_t *event);
+
+int AMotionEvent_getPointerId(event_t *event, size_t index);
+
+sfp_float AMotionEvent_getX(event_t *event, size_t index);
+
+sfp_float AMotionEvent_getY(event_t *event, size_t index);
 
 #endif //KERO_BLASTER_VITA_CONTROL_H
