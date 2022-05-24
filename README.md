@@ -1,10 +1,10 @@
-# Kera-Blaster-vita
+# Kero-Blaster-vita
 
 ![Title screen](./screenshots/title_en.jpg)
 
 <p align="center">EN | <a href="README.cn.md">中文</a></p>
 
-Kera Blaster (Android version) port for PS VITA
+Kero Blaster (Android version) port for PS VITA
 
 ## Setup Instructions (For End Users)
 
@@ -23,7 +23,7 @@ In order to properly install the game, you'll have to follow these steps precise
 
 **Note** Don't install fd_fix.skprx if you're using repatch plugin
 
-- Obtain your copy of *Kera-Blaster v1.6.0* legally for Android in form of an `.apk` file. 
+- Obtain your copy of *Kero-Blaster v1.6.0* legally for Android in form of an `.apk` file. 
   [You can get all the required files directly from your phone](https://stackoverflow.com/questions/11012976/how-do-i-get-the-apk-of-an-installed-app-without-root-access)
   or by using an apk extractor you can find in the play store. The apk can be extracted with
   whatever Zip extractor you prefer (eg: WinZip, WinRar, etc...) since apk is basically a zip 
