@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<livearea style="psmobile" format-ver="01.00" content-rev="1">
+<livearea style="browser" format-ver="01.00" content-rev="1">
 	<livearea-background>
 		<image>bg.png</image>
 	</livearea-background>
@@ -16,4 +16,18 @@
 			startup_zh-CN.png
 		</startup-image>
 	</gate>
+	
+	<frame id='frame9'>
+		<liveitem>
+			<target>psla:pink_hour</target>
+			<image>frame1.png</image>
+		</liveitem>
+	</frame>
+	
+	<frame id='frame10'>
+		<liveitem>
+			<target>psla:pink_heaven</target>
+			<image>frame2.png</image>
+		</liveitem>
+	</frame>
 </livearea>
