@@ -4,7 +4,7 @@
 
 <p align="center"><a href="README.md">EN</a> | 中文</p>
 
-本仓库是青蛙爆破者 (Android) 的 PS VITA 移植
+本仓库是青蛙爆破者、粉红时光、粉红天堂 (Android) 的 PS VITA 移植
 
 ## 安装方式 (给用户)
 
@@ -23,10 +23,14 @@
 
 **注意** 如果你安装了 repatch 插件，就不用再安装 fd_fix.skprx 了
 
-- 通过合法手段获得 *Kera-Blaster v1.6.0* 的 APK 安装包，更改后缀名为 `.zip`，然后用解压缩软件解压
+- 通过合法手段获得 *青蛙爆破者 v1.6.1* 的 APK 安装包，更改后缀名为 `.zip`，然后用解压缩软件解压
 - 在 PSV 的 `ux0:data` 下新建 `kero` 文件夹
 - 把解压后的 `assets` 复制到 `ux0:data/kero` 下
 - 把文件 `lib/armeabi-v7a/libpxgame.so` 复制到 `ux0:data/kero` 下
+- (可选) 如果你还想安装 *粉红时光* 或 *粉红天堂*，就按照上述步骤把对应 APK 中的 `assets` 和 
+  `libpxgame.so` 复制到：
+  - 对于 *粉红时光 v1.6.0*，复制到 `ux0:data/kero/pink_hour` 下
+  - 对于 *粉红天堂 v1.6.1*，复制到 `ux0:data/kero/pink_heaven` 下
 - 安装 [Kero-Blaster.vpk](https://github.com/kaaass/Kero-Blaster-vita/releases)
 
 ## 控制方式
