@@ -10,7 +10,6 @@
 #include <stdarg.h>
 #include "audio.h"
 #include "so_util.h"
-#include "config.h"
 #include "dyn_stub.h"
 #include "main.h"
 #include "game_info.h"
@@ -64,7 +63,9 @@ int mutex_unlock_hook(void **lock) {
 void patch_game() {
     patch_audio();
 
+#if defined(DEBUG)
     hook_addr(FUNC_ADDR(write_last_error), (uintptr_t) &write_last_error_hook);
+#endif
     hook_addr(FUNC_ADDR(mutex_lock), (uintptr_t) &mutex_lock_hook);
     hook_addr(FUNC_ADDR(mutex_unlock), (uintptr_t) &mutex_unlock_hook);
 }
