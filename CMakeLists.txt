@@ -30,7 +30,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wl,-q,--wrap,memcpy,--wrap,memmove,--wra
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 
 add_definitions(-D__psp2__)
-add_definitions(-DGAME_VERSION="${GAME_VERSION}")
+add_definitions(-DMAIN_VERSION="${GAME_VERSION}")
 add_definitions(-DVITA_VERSION="${VITA_VERSION}")
 
 add_executable(Kero-Blaster

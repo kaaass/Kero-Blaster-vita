@@ -21,6 +21,7 @@ extern support_game current_game;
 #define SO_PATH (info_so_path())
 #define ASSETS_PATH (info_assets_path())
 #define SUPPORT_JOYSTICK (info_support_joystick[current_game])
+#define GAME_VERSION (info_game_version[current_game])
 #define FUNC_ADDR(sym) (address_##sym[current_game])
 
 /*
@@ -40,6 +41,7 @@ extern char *info_data_path[MAX_SUPPORT_GAME];
 char *info_so_path();
 char *info_assets_path();
 extern bool info_support_joystick[MAX_SUPPORT_GAME];
+extern char *info_game_version[MAX_SUPPORT_GAME];
 
 extern uintptr_t address_pxaAudioStream_open[MAX_SUPPORT_GAME];
 extern uintptr_t address_onInputEvent[MAX_SUPPORT_GAME];

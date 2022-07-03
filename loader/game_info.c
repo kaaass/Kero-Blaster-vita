@@ -51,6 +51,16 @@ bool info_support_joystick[MAX_SUPPORT_GAME] = {
         [PINK_HOUR]    = false,
 };
 
+char *info_game_version[MAX_SUPPORT_GAME] = {
+#if defined(MAIN_VERSION)
+        [KERO_BLASTER] = MAIN_VERSION,
+#else
+        [KERO_BLASTER] = "unknown",
+#endif
+        [PINK_HEAVEN]  = "1.6.1",
+        [PINK_HOUR]    = "1.6.0",
+};
+
 uintptr_t address_pxaAudioStream_open[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = LOAD_ADDRESS + 0x1b3d0 + 1,
         [PINK_HEAVEN]  = LOAD_ADDRESS + 0x1b290 + 1,

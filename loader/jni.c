@@ -88,13 +88,20 @@ void *GetObjectField(void *env, void *obj, int fieldID) {
     debugPrintf("GetObjectField: fieldID = %d\n", fieldID);
     switch (fieldID) {
         case JNI_FIELD_versionName:
-#if defined(GAME_VERSION) && defined(VITA_VERSION)
-            return (void *) GAME_VERSION "_" VITA_VERSION;
+#if defined(VITA_VERSION)
+        {
+            static char version[256];
+            version[0] = '\0';
+            strcpy(version, GAME_VERSION);
+            strcat(version, "_" VITA_VERSION);
+            return (void *) version;
+        }
 #else
-            return (void *) "unknown";
+            return (void *) GAME_VERSION;
 #endif
+        default:
+            return "";
     }
-    return "";
 }
 
 void CallObjectMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
