@@ -1,127 +1,161 @@
-/* dialog.c -- common dialog for error messages and cheats input
+/* dialog.c -- common dialog for error messages
  *
- * Copyright (C) 2021 fgsfds, Andy Nguyen
+ * Copyright (C) 1997-2022 Sam Lantinga <slouken@libsdl.org>
+ * Copyright (C) 2022 KAAAsS
  *
- * This software may be modified and distributed under the terms
- * of the MIT license.  See the LICENSE file for details.
+ * This file includes the source code of SDL2, see https://github.com/libsdl-org/SDL/blob/main/LICENSE.txt
+ * for the original license.
  */
 
 #include <psp2/kernel/processmgr.h>
-#include <psp2/ctrl.h>
-#include <psp2/ime_dialog.h>
 #include <psp2/message_dialog.h>
-#include <vitaGL.h>
-
 #include <stdio.h>
 #include <stdarg.h>
+#include <psp2/display.h>
+#include <stdbool.h>
+#include <psp2/gxm.h>
+#include <psp2/types.h>
+#include <psp2/kernel/sysmem.h>
 
 #include "main.h"
 #include "dialog.h"
 
-static uint16_t ime_title_utf16[SCE_IME_DIALOG_MAX_TITLE_LENGTH];
-static uint16_t ime_initial_text_utf16[SCE_IME_DIALOG_MAX_TEXT_LENGTH];
-static uint16_t ime_input_text_utf16[SCE_IME_DIALOG_MAX_TEXT_LENGTH + 1];
-static uint8_t ime_input_text_utf8[SCE_IME_DIALOG_MAX_TEXT_LENGTH + 1];
+#define VITA_GXM_PENDING_SWAPS    2
+#define VITA_GXM_BUFFERS          3
+#define VITA_GXM_SCREEN_WIDTH     960
+#define VITA_GXM_SCREEN_HEIGHT    544
+#define VITA_GXM_SCREEN_STRIDE    960
+#define VITA_GXM_PIXEL_FORMAT    SCE_DISPLAY_PIXELFORMAT_A8B8G8R8
 
-void utf16_to_utf8(const uint16_t *src, uint8_t *dst) {
-    for (int i = 0; src[i]; i++) {
-        if ((src[i] & 0xFF80) == 0) {
-            *(dst++) = src[i] & 0xFF;
-        } else if ((src[i] & 0xF800) == 0) {
-            *(dst++) = ((src[i] >> 6) & 0xFF) | 0xC0;
-            *(dst++) = (src[i] & 0x3F) | 0x80;
-        } else if ((src[i] & 0xFC00) == 0xD800 && (src[i + 1] & 0xFC00) == 0xDC00) {
-            *(dst++) = (((src[i] + 64) >> 8) & 0x3) | 0xF0;
-            *(dst++) = (((src[i] >> 2) + 16) & 0x3F) | 0x80;
-            *(dst++) = ((src[i] >> 4) & 0x30) | 0x80 | ((src[i + 1] << 2) & 0xF);
-            *(dst++) = (src[i + 1] & 0x3F) | 0x80;
-            i += 1;
-        } else {
-            *(dst++) = ((src[i] >> 12) & 0xF) | 0xE0;
-            *(dst++) = ((src[i] >> 6) & 0x3F) | 0x80;
-            *(dst++) = (src[i] & 0x3F) | 0x80;
-        }
-    }
+typedef struct {
+    void *address;
+    uint8_t wait_vblank;
+} VITA_GXM_DisplayData;
 
-    *dst = '\0';
-}
+#define ALIGN(x, align) (((x) + ((align) - 1)) & ~((align) - 1))
 
-void utf8_to_utf16(const uint8_t *src, uint16_t *dst) {
-    for (int i = 0; src[i];) {
-        if ((src[i] & 0xE0) == 0xE0) {
-            *(dst++) = ((src[i] & 0x0F) << 12) | ((src[i + 1] & 0x3F) << 6) | (src[i + 2] & 0x3F);
-            i += 3;
-        } else if ((src[i] & 0xC0) == 0xC0) {
-            *(dst++) = ((src[i] & 0x1F) << 6) | (src[i + 1] & 0x3F);
-            i += 2;
-        } else {
-            *(dst++) = src[i];
-            i += 1;
-        }
-    }
+static void *vita_mem_alloc(SceKernelMemBlockType type, unsigned int size, unsigned int attribs, SceUID *uid) {
+    void *mem;
 
-    *dst = '\0';
-}
+    size = ALIGN(size, 256 * 1024);
+    *uid = sceKernelAllocMemBlock("gpu_mem", type, size, NULL);
 
-int init_ime_dialog(const char *title, const char *initial_text) {
-    memset(ime_title_utf16, 0, sizeof(ime_title_utf16));
-    memset(ime_initial_text_utf16, 0, sizeof(ime_initial_text_utf16));
-    memset(ime_input_text_utf16, 0, sizeof(ime_input_text_utf16));
-    memset(ime_input_text_utf8, 0, sizeof(ime_input_text_utf8));
-
-    utf8_to_utf16((uint8_t *) title, ime_title_utf16);
-    utf8_to_utf16((uint8_t *) initial_text, ime_initial_text_utf16);
-
-    SceImeDialogParam param;
-    sceImeDialogParamInit(&param);
-
-    param.supportedLanguages = 0x0001FFFF;
-    param.languagesForced = SCE_TRUE;
-    param.type = SCE_IME_TYPE_BASIC_LATIN;
-    param.title = ime_title_utf16;
-    param.maxTextLength = SCE_IME_DIALOG_MAX_TEXT_LENGTH;
-    param.initialText = ime_initial_text_utf16;
-    param.inputTextBuffer = ime_input_text_utf16;
-
-    return sceImeDialogInit(&param);
-}
-
-char *get_ime_dialog_result(void) {
-    if (sceImeDialogGetStatus() != SCE_COMMON_DIALOG_STATUS_FINISHED)
+    if (*uid < 0)
         return NULL;
 
-    SceImeDialogResult result;
-    memset(&result, 0, sizeof(SceImeDialogResult));
-    sceImeDialogGetResult(&result);
-    if (result.button == SCE_IME_DIALOG_BUTTON_ENTER)
-        utf16_to_utf8(ime_input_text_utf16, ime_input_text_utf8);
-    sceImeDialogTerm();
-    // For some reason analog stick stops working after ime
-    sceCtrlSetSamplingModeExt(SCE_CTRL_MODE_ANALOG_WIDE);
+    if (sceKernelGetMemBlockBase(*uid, &mem) < 0)
+        return NULL;
 
-    return (char *) ime_input_text_utf8;
+    if (sceGxmMapMemory(mem, size, attribs) < 0)
+        return NULL;
+
+    return mem;
 }
 
-int init_msg_dialog(const char *msg) {
-    SceMsgDialogUserMessageParam msg_param;
-    memset(&msg_param, 0, sizeof(msg_param));
-    msg_param.buttonType = SCE_MSG_DIALOG_BUTTON_TYPE_OK;
-    msg_param.msg = (SceChar8 *) msg;
-
-    SceMsgDialogParam param;
-    sceMsgDialogParamInit(&param);
-    _sceCommonDialogSetMagicNumber(&param.commonParam);
-    param.mode = SCE_MSG_DIALOG_MODE_USER_MSG;
-    param.userMsgParam = &msg_param;
-
-    return sceMsgDialogInit(&param);
+static void vita_mem_free(SceUID uid) {
+    void *mem = NULL;
+    if (sceKernelGetMemBlockBase(uid, &mem) < 0)
+        return;
+    sceGxmUnmapMemory(mem);
+    sceKernelFreeMemBlock(uid);
 }
 
-int get_msg_dialog_result(void) {
-    if (sceMsgDialogGetStatus() != SCE_COMMON_DIALOG_STATUS_FINISHED)
-        return 0;
-    sceMsgDialogTerm();
-    return 1;
+static void display_callback(const void *callback_data) {
+    SceDisplayFrameBuf framebuf;
+    const VITA_GXM_DisplayData *display_data = (const VITA_GXM_DisplayData *) callback_data;
+
+    memset(&framebuf, 0x00, sizeof(SceDisplayFrameBuf));
+    framebuf.size = sizeof(SceDisplayFrameBuf);
+    framebuf.base = display_data->address;
+    framebuf.pitch = VITA_GXM_SCREEN_STRIDE;
+    framebuf.pixelformat = VITA_GXM_PIXEL_FORMAT;
+    framebuf.width = VITA_GXM_SCREEN_WIDTH;
+    framebuf.height = VITA_GXM_SCREEN_HEIGHT;
+    sceDisplaySetFrameBuf(&framebuf, SCE_DISPLAY_SETBUF_NEXTFRAME);
+
+    if (display_data->wait_vblank) {
+        sceDisplayWaitVblankStart();
+    }
+}
+
+
+static unsigned int back_buffer_index_for_common_dialog = 0;
+static unsigned int front_buffer_index_for_common_dialog = 0;
+struct {
+    VITA_GXM_DisplayData displayData;
+    SceGxmSyncObject *sync;
+    SceGxmColorSurface surf;
+    SceUID uid;
+} buffer_for_common_dialog[VITA_GXM_BUFFERS];
+
+void gxm_minimal_init_for_common_dialog(void) {
+    SceGxmInitializeParams initializeParams;
+    memset(&initializeParams, 0, sizeof(SceGxmInitializeParams));
+    initializeParams.flags = 0;
+    initializeParams.displayQueueMaxPendingCount = VITA_GXM_PENDING_SWAPS;
+    initializeParams.displayQueueCallback = display_callback;
+    initializeParams.displayQueueCallbackDataSize = sizeof(VITA_GXM_DisplayData);
+    initializeParams.parameterBufferSize = SCE_GXM_DEFAULT_PARAMETER_BUFFER_SIZE;
+    sceGxmInitialize(&initializeParams);
+}
+
+void gxm_minimal_term_for_common_dialog(void) {
+    sceGxmTerminate();
+}
+
+void gxm_init_for_common_dialog(void) {
+    for (int i = 0; i < VITA_GXM_BUFFERS; i += 1) {
+        buffer_for_common_dialog[i].displayData.wait_vblank = true;
+        buffer_for_common_dialog[i].displayData.address = vita_mem_alloc(
+                SCE_KERNEL_MEMBLOCK_TYPE_USER_CDRAM_RW,
+                4 * VITA_GXM_SCREEN_STRIDE * VITA_GXM_SCREEN_HEIGHT,
+                SCE_GXM_MEMORY_ATTRIB_READ | SCE_GXM_MEMORY_ATTRIB_WRITE,
+                &buffer_for_common_dialog[i].uid);
+        sceGxmColorSurfaceInit(
+                &buffer_for_common_dialog[i].surf,
+                (SceGxmColorFormat) VITA_GXM_PIXEL_FORMAT,
+                SCE_GXM_COLOR_SURFACE_LINEAR,
+                SCE_GXM_COLOR_SURFACE_SCALE_NONE,
+                SCE_GXM_OUTPUT_REGISTER_SIZE_32BIT,
+                VITA_GXM_SCREEN_WIDTH,
+                VITA_GXM_SCREEN_HEIGHT,
+                VITA_GXM_SCREEN_STRIDE,
+                buffer_for_common_dialog[i].displayData.address
+        );
+        sceGxmSyncObjectCreate(&buffer_for_common_dialog[i].sync);
+    }
+    sceGxmDisplayQueueFinish();
+}
+
+void gxm_swap_for_common_dialog(void) {
+    SceCommonDialogUpdateParam updateParam;
+    memset(&updateParam, 0, sizeof(SceCommonDialogUpdateParam));
+    updateParam.renderTarget.colorFormat = (SceGxmColorFormat) VITA_GXM_PIXEL_FORMAT;
+    updateParam.renderTarget.surfaceType = SCE_GXM_COLOR_SURFACE_LINEAR;
+    updateParam.renderTarget.width = VITA_GXM_SCREEN_WIDTH;
+    updateParam.renderTarget.height = VITA_GXM_SCREEN_HEIGHT;
+    updateParam.renderTarget.strideInPixels = VITA_GXM_SCREEN_STRIDE;
+
+    updateParam.renderTarget.colorSurfaceData = buffer_for_common_dialog[back_buffer_index_for_common_dialog].displayData.address;
+
+    updateParam.displaySyncObject = buffer_for_common_dialog[back_buffer_index_for_common_dialog].sync;
+    memset(buffer_for_common_dialog[back_buffer_index_for_common_dialog].displayData.address, 0,
+           4 * VITA_GXM_SCREEN_STRIDE * VITA_GXM_SCREEN_HEIGHT);
+    sceCommonDialogUpdate(&updateParam);
+
+    sceGxmDisplayQueueAddEntry(buffer_for_common_dialog[front_buffer_index_for_common_dialog].sync,
+                               buffer_for_common_dialog[back_buffer_index_for_common_dialog].sync,
+                               &buffer_for_common_dialog[back_buffer_index_for_common_dialog].displayData);
+    front_buffer_index_for_common_dialog = back_buffer_index_for_common_dialog;
+    back_buffer_index_for_common_dialog = (back_buffer_index_for_common_dialog + 1) % VITA_GXM_BUFFERS;
+}
+
+void gxm_term_for_common_dialog(void) {
+    sceGxmDisplayQueueFinish();
+    for (int i = 0; i < VITA_GXM_BUFFERS; i += 1) {
+        vita_mem_free(buffer_for_common_dialog[i].uid);
+        sceGxmSyncObjectDestroy(buffer_for_common_dialog[i].sync);
+    }
 }
 
 void fatal_error(const char *fmt, ...) {
@@ -132,13 +166,54 @@ void fatal_error(const char *fmt, ...) {
     vsnprintf(string, sizeof(string), fmt, list);
     va_end(list);
 
-// fixme: message box
-//  vglInit(0);
+    debugPrintf("[FatalError]: %s\n", string);
 
-    init_msg_dialog(string);
+    SceMsgDialogParam param;
+    SceMsgDialogUserMessageParam msgParam;
+    SceMsgDialogButtonsParam buttonParam;
+    SceDisplayFrameBuf dispparam;
 
-//  while (!get_msg_dialog_result())
-//    vglSwapBuffers(GL_TRUE);
+    SceMsgDialogResult dialog_result;
+    SceCommonDialogErrorCode init_result;
+    bool setup_minimal_gxm = false;
+
+    memset(&param, 0, sizeof(param));
+    sceMsgDialogParamInit(&param);
+    param.mode = SCE_MSG_DIALOG_MODE_USER_MSG;
+
+    memset(&msgParam, 0, sizeof(msgParam));
+
+    msgParam.msg = (const SceChar8 *) string;
+    memset(&buttonParam, 0, sizeof(buttonParam));
+
+    msgParam.buttonType = SCE_MSG_DIALOG_BUTTON_TYPE_OK;
+    param.userMsgParam = &msgParam;
+
+    dispparam.size = sizeof(dispparam);
+
+    init_result = sceMsgDialogInit(&param);
+
+    // Setup display if it hasn't been initialized before
+    if (init_result == SCE_COMMON_DIALOG_ERROR_GXM_IS_UNINITIALIZED) {
+        gxm_minimal_init_for_common_dialog();
+        init_result = sceMsgDialogInit(&param);
+        setup_minimal_gxm = true;
+    }
+
+    gxm_init_for_common_dialog();
+
+    if (init_result >= 0) {
+        while (sceMsgDialogGetStatus() == SCE_COMMON_DIALOG_STATUS_RUNNING) {
+            gxm_swap_for_common_dialog();
+        }
+        sceMsgDialogTerm();
+    }
+
+    gxm_term_for_common_dialog();
+
+    if (setup_minimal_gxm) {
+        gxm_minimal_term_for_common_dialog();
+    }
 
     sceKernelExitProcess(0);
     while (1);

@@ -80,6 +80,7 @@ cmake .. && make
 - GrapheneCt for PVR_PSP2, which is the graphic backend in this project
 - frangarcj for porting OpenSLES
 - alula for helping me to solve the key configuration issue (#2)
+- SDL2 for the implementation of error message dialog
 
 ## Progress
 

@@ -68,6 +68,7 @@ target_link_libraries(Kero-Blaster
         SceTouch_stub
         SceVshBridge_stub
         SceAudio_stub
+        SceGxm_stub
         libIMGEGL_stub_weak
         libgpu_es4_ext_stub_weak
         libGLESv2_stub_weak
