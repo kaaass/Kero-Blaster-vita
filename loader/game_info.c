@@ -20,11 +20,13 @@
 uint64_t info_so_hash[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = 0x019745ff,
         [PINK_HEAVEN]  = 0x0db776df,
+        [PINK_HOUR]    = 0x0c24916c,
 };
 
 char *info_data_path[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = "ux0:data/kero",
         [PINK_HEAVEN]  = "ux0:data/kero/pink_heaven",
+        [PINK_HOUR]    = "ux0:data/kero/pink_hour",
 };
 
 char *info_so_path() {
@@ -46,31 +48,37 @@ char *info_assets_path() {
 uintptr_t address_pxaAudioStream_open[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = LOAD_ADDRESS + 0x1b3d0 + 1,
         [PINK_HEAVEN]  = LOAD_ADDRESS + 0x1b290 + 1,
+        [PINK_HOUR]    = LOAD_ADDRESS + 0x19e60 + 1,
 };
 
 uintptr_t address_onInputEvent[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = LOAD_ADDRESS + 0x18e74 + 1,
         [PINK_HEAVEN]  = LOAD_ADDRESS + 0x18d30 + 1,
+        [PINK_HOUR]    = LOAD_ADDRESS + 0x17f64 + 1,
 };
 
 uintptr_t address_onAppCmd[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = LOAD_ADDRESS + 0x18df0 + 1,
         [PINK_HEAVEN]  = LOAD_ADDRESS + 0x18cac + 1,
+        [PINK_HOUR]    = LOAD_ADDRESS + 0x17ef4 + 1,
 };
 
 uintptr_t address_write_last_error[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = LOAD_ADDRESS + 0xb24c4 + 0x1,
         [PINK_HEAVEN]  = LOAD_ADDRESS + 0xb1a74 + 0x1,
+        [PINK_HOUR]    = LOAD_ADDRESS + 0xb0324 + 0x1,
 };
 
 uintptr_t address_mutex_lock[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = LOAD_ADDRESS + 0xb4bf8 + 0x1,
         [PINK_HEAVEN]  = LOAD_ADDRESS + 0xb41a8 + 0x1,
+        [PINK_HOUR]    = LOAD_ADDRESS + 0xb299c + 0x1,
 };
 
 uintptr_t address_mutex_unlock[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = LOAD_ADDRESS + 0xb4c12 + 0x1,
         [PINK_HEAVEN]  = LOAD_ADDRESS + 0xb41c2 + 0x1,
+        [PINK_HOUR]    = LOAD_ADDRESS + 0xb29b6 + 0x1,
 };
 
 /*
