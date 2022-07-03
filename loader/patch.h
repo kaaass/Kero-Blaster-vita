@@ -1,0 +1,6 @@
+#ifndef KERO_BLASTER_VITA_PATCH_H
+#define KERO_BLASTER_VITA_PATCH_H
+
+void patch_game();
+
+#endif //KERO_BLASTER_VITA_PATCH_H

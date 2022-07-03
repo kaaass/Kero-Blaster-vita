@@ -127,20 +127,20 @@ int init_egl() {
 }
 
 /*
- * EGL Hooks
+ * EGL Stubs
  */
 
 EGLContext
-eglCreateContext_hook(EGLDisplay dpy, EGLConfig config, EGLContext share_context, const EGLint *attrib_list) {
+eglCreateContext_stub(EGLDisplay dpy, EGLConfig config, EGLContext share_context, const EGLint *attrib_list) {
     return egl_context;
 }
 
 EGLSurface
-eglCreateWindowSurface_hook(EGLDisplay dpy, EGLConfig config, EGLNativeWindowType win, const EGLint *attrib_list) {
+eglCreateWindowSurface_stub(EGLDisplay dpy, EGLConfig config, EGLNativeWindowType win, const EGLint *attrib_list) {
     return egl_surface;
 }
 
-EGLDisplay eglGetDisplay_hook(EGLNativeDisplayType display_id) {
+EGLDisplay eglGetDisplay_stub(EGLNativeDisplayType display_id) {
     // init EGL
     debugPrintf("eglGetDisplay_hook triggered, init EGL");
     init_egl();
@@ -148,7 +148,7 @@ EGLDisplay eglGetDisplay_hook(EGLNativeDisplayType display_id) {
     return egl_display;
 }
 
-EGLBoolean EGLAPIENTRY eglChooseConfig_hook(EGLDisplay dpy, const EGLint *attrib_list,
+EGLBoolean EGLAPIENTRY eglChooseConfig_stub(EGLDisplay dpy, const EGLint *attrib_list,
                                        EGLConfig *configs, EGLint config_size,
                                        EGLint *num_config) {
     *num_config = 1;

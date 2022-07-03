@@ -20,9 +20,9 @@ int init_egl();
  * EGL Hooks
  */
 
-EGLContext eglCreateContext_hook(EGLDisplay dpy, EGLConfig config, EGLContext share_context, const EGLint *attrib_list);
-EGLSurface eglCreateWindowSurface_hook(EGLDisplay dpy, EGLConfig config, EGLNativeWindowType win, const EGLint *attrib_list);
-EGLDisplay eglGetDisplay_hook(EGLNativeDisplayType display_id);
-EGLBoolean EGLAPIENTRY eglChooseConfig_hook(EGLDisplay dpy, const EGLint *attrib_list, EGLConfig *configs, EGLint config_size, EGLint *num_config);
+EGLContext eglCreateContext_stub(EGLDisplay dpy, EGLConfig config, EGLContext share_context, const EGLint *attrib_list);
+EGLSurface eglCreateWindowSurface_stub(EGLDisplay dpy, EGLConfig config, EGLNativeWindowType win, const EGLint *attrib_list);
+EGLDisplay eglGetDisplay_stub(EGLNativeDisplayType display_id);
+EGLBoolean eglChooseConfig_stub(EGLDisplay dpy, const EGLint *attrib_list, EGLConfig *configs, EGLint config_size, EGLint *num_config);
 
 #endif //KERO_BLASTER_VITA_OPENGL_H

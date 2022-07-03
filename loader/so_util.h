@@ -1,6 +1,7 @@
 #ifndef __SO_UTIL_H__
 #define __SO_UTIL_H__
 
+#include <psp2common/types.h>
 #include <elf.h>
 
 #if defined(__cplusplus)

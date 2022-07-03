@@ -11,13 +11,10 @@
 #include <psp2/kernel/threadmgr.h>
 #include <psp2/power.h>
 #include <psp2/touch.h>
-
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
 #include <psp2/io/stat.h>
 #include <psp2/ctrl.h>
-#include <malloc.h>
+
+#include <stdio.h>
 
 #include "main.h"
 #include "config.h"
@@ -27,7 +24,7 @@
 #include "dyn_stub.h"
 #include "opengl.h"
 #include "control.h"
-#include "audio.h"
+#include "patch.h"
 
 __attribute__((unused)) int _newlib_heap_size_user = MEMORY_NEWLIB_MB * 1024 * 1024; // NOLINT(bugprone-reserved-identifier)
 __attribute__((unused)) unsigned int _pthread_stack_default_user = 1 * 1024 * 1024; // NOLINT(bugprone-reserved-identifier)
@@ -65,26 +62,6 @@ int debugPrintf(char *text, ...) {
     }
 #endif
     return 0;
-}
-
-void write_last_error_hook(char *fmt, ...) {
-    va_list list;
-    static char string[0x8000];
-
-    va_start(list, fmt);
-    vsprintf(string, fmt, list);
-    va_end(list);
-#if defined(DEBUG)
-    debugPrintf("[LastError]: %s\n", string);
-#else
-    printf("[LastError]: %s\n", string);
-#endif
-}
-
-void patch_game(void) {
-    patch_audio();
-
-    hook_addr(LOAD_ADDRESS + 0xb24c4 + 0x1, (uintptr_t) &write_last_error_hook);
 }
 
 int check_kubridge(void) {
