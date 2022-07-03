@@ -39,14 +39,14 @@ In order to properly install the game, you'll have to follow these steps precise
 
 You could use both keypad and front touch screen to control. Key mapping is as follows:
 
-| Vita Key          | Default usage | Been mapped to |
-| ----------------- | ------------- | -------------- |
-| Arrows/L-joystick | Directions    | Arrows Key     |
-| Square            | Jump          | Z              |
-| Cross             | Shoot         | X              |
-| Triangle/Square   | Weapon Switch | A/S            |
-| Select            | Open Menu     | Esc            |
-| L/R/Start         | Keyconfig     | F1/F2/F3       |
+| Vita Key                   | Default usage | Been mapped to |
+|----------------------------| ------------- | -------------- |
+| Arrows/L-joystick          | Directions    | Arrows Key     |
+| Square                     | Jump          | Z              |
+| Cross                      | Shoot         | X              |
+| Triangle/Square & L/R      | Weapon Switch | A/S            |
+| Select                     | Open Menu     | Esc            |
+| Start/Left Back/Right Back | Keyconfig     | F1/F2/F3       |
 
 Your saved data are located in `ux0:data/kero/profile`.
 

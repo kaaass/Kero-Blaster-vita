@@ -55,9 +55,9 @@ static button_mapping_t mapping[] = {
         {SCE_CTRL_RIGHT,    AKEYCODE_DPAD_RIGHT},
         {SCE_CTRL_DOWN,     AKEYCODE_DPAD_DOWN},
         {SCE_CTRL_SELECT,   AKEYCODE_ESCAPE},
-        {SCE_CTRL_L1,       AKEYCODE_F1},
-        {SCE_CTRL_R1,       AKEYCODE_F2},
-        {SCE_CTRL_START,    AKEYCODE_F3},
+        {SCE_CTRL_L1,       AKEYCODE_A},
+        {SCE_CTRL_R1,       AKEYCODE_S},
+        {SCE_CTRL_START,    AKEYCODE_F1},
 };
 
 /*
@@ -175,6 +175,7 @@ _Noreturn int ctrl_thread(SceSize args, void *argp) {
     float last_y[2] = {-1, -1};
     float last_pad[4] = {0, 0, 0, 0};
     float cur_pad[4] = {0, 0, 0, 0};
+    bool last_lback = false, last_rback = false;
 
     while (1) {
         // Touch event
@@ -197,6 +198,26 @@ _Noreturn int ctrl_thread(SceSize args, void *argp) {
                     submit_touch_event(MOTION_UP, last_x[i], last_y[i]);
                 last_x[i] = -1;
                 last_y[i] = -1;
+            }
+        }
+
+        // Back touch event
+        sceTouchPeek(SCE_TOUCH_PORT_BACK, &touch, 1);
+
+        if (touch.reportNum > 0) {
+            if (touch.report[0].y < 600) {
+                bool lback = touch.report[0].x < 960 && touch.report[0].x > 240;
+                bool rback = touch.report[0].x > 960 && touch.report[0].x < 1680;
+                if (lback && !last_lback)
+                    submit_key_event(false, AKEYCODE_F2);
+                else if (!lback && last_lback)
+                    submit_key_event(true, AKEYCODE_F2);
+                if (rback && !last_rback)
+                    submit_key_event(false, AKEYCODE_F3);
+                else if (!rback && last_rback)
+                    submit_key_event(true, AKEYCODE_F3);
+                last_lback = lback;
+                last_rback = rback;
             }
         }
 
