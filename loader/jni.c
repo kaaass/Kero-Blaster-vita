@@ -12,6 +12,7 @@
 #include "jni.h"
 #include "dialog.h"
 #include "so_util.h"
+#include "game_info.h"
 
 char fake_vm[0x1000];
 char fake_env[0x1000];

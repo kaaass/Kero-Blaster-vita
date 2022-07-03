@@ -13,6 +13,7 @@
 #include "config.h"
 #include "dyn_stub.h"
 #include "main.h"
+#include "game_info.h"
 
 void write_last_error_hook(char *fmt, ...) {
     va_list list;
@@ -63,7 +64,7 @@ int mutex_unlock_hook(void **lock) {
 void patch_game() {
     patch_audio();
 
-    hook_addr(LOAD_ADDRESS + 0xb24c4 + 0x1, (uintptr_t) &write_last_error_hook);
-    hook_addr(LOAD_ADDRESS + 0xb4bf8 + 0x1, (uintptr_t) &mutex_lock_hook);
-    hook_addr(LOAD_ADDRESS + 0xb4c12 + 0x1, (uintptr_t) &mutex_unlock_hook);
+    hook_addr(FUNC_ADDR(write_last_error), (uintptr_t) &write_last_error_hook);
+    hook_addr(FUNC_ADDR(mutex_lock), (uintptr_t) &mutex_lock_hook);
+    hook_addr(FUNC_ADDR(mutex_unlock), (uintptr_t) &mutex_unlock_hook);
 }

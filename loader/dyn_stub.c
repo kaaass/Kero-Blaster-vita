@@ -31,6 +31,7 @@
 #include "so_util.h"
 #include "llvm_next_prime.h"
 #include "sfp.h"
+#include "game_info.h"
 
 #define STUB_FUNC_FULL(name, rettype, retval, ...) rettype name(__VARGS__) { \
                             printf("stub: '" #name "' unimplemented\n"); \
@@ -182,7 +183,7 @@ int ALooper_pollAll(int timeout, int *outFd, int *outEvents, void **outData) {
     // process event
     call_count++;
     if (call_count == 1) {
-        void (*onAppCmd)(void *app, int cmd) = (void (*)(void *, int)) (LOAD_ADDRESS + 0x18df0 + 1);
+        void (*onAppCmd)(void *app, int cmd) = (void (*)(void *, int)) FUNC_ADDR(onAppCmd);
         // trigger INIT_WINDOW
         *(uintptr_t *) (fake_activity.instance + 0x24) = 0x42424242;
         onAppCmd(fake_activity.instance, 1);

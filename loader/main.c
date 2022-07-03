@@ -15,6 +15,7 @@
 #include <psp2/ctrl.h>
 
 #include <stdio.h>
+#include <string.h>
 
 #include "main.h"
 #include "config.h"
@@ -25,6 +26,7 @@
 #include "opengl.h"
 #include "control.h"
 #include "patch.h"
+#include "game_info.h"
 
 __attribute__((unused)) int _newlib_heap_size_user = MEMORY_NEWLIB_MB * 1024 * 1024; // NOLINT(bugprone-reserved-identifier)
 __attribute__((unused)) unsigned int _pthread_stack_default_user = 1 * 1024 * 1024; // NOLINT(bugprone-reserved-identifier)
@@ -69,11 +71,6 @@ int check_kubridge(void) {
     return _vshKernelSearchModuleByName("kubridge", search_unk);
 }
 
-int file_exists(const char *path) {
-    SceIoStat stat;
-    return sceIoGetstat(path, &stat) >= 0;
-}
-
 int main(int argc, char *argv[]) {
     debugPrintf("%c[2J", 27);
     sceCtrlSetSamplingModeExt(SCE_CTRL_MODE_ANALOG_WIDE);
@@ -87,8 +84,12 @@ int main(int argc, char *argv[]) {
     if (check_kubridge() < 0)
         fatal_error("Error kubridge.skprx is not installed.");
 
+    check_game();
+
     if (so_load(&kero_mod, SO_PATH, LOAD_ADDRESS) < 0)
         fatal_error("Error could not load %s.", SO_PATH);
+
+    check_so_hash();
 
     so_relocate(&kero_mod);
     resolve_dynamic_symbol();

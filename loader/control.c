@@ -13,6 +13,7 @@
 #include "config.h"
 #include "main.h"
 #include "opengl.h"
+#include "game_info.h"
 
 enum {
     AKEYCODE_DPAD_UP = 19,
@@ -207,7 +208,7 @@ _Noreturn int ctrl_thread(SceSize args, void *argp) {
  */
 
 int process_control_event() {
-    int (*onInputEvent)(void *app, void *event) = (int (*)(void *, void *)) (LOAD_ADDRESS + 0x18e74 + 1);
+    int (*onInputEvent)(void *app, void *event) = (int (*)(void *, void *)) FUNC_ADDR(onInputEvent);
     int ret;
 
     event_buf_lock();

@@ -44,6 +44,7 @@ add_executable(Kero-Blaster
         loader/llvm_next_prime.cpp
         loader/audio.cpp
         loader/patch.c
+        loader/game_info.c
         )
 
 target_link_libraries(Kero-Blaster
