@@ -45,6 +45,12 @@ char *info_assets_path() {
     return path_buf;
 }
 
+bool info_support_joystick[MAX_SUPPORT_GAME] = {
+        [KERO_BLASTER] = true,
+        [PINK_HEAVEN]  = true,
+        [PINK_HOUR]    = false,
+};
+
 uintptr_t address_pxaAudioStream_open[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = LOAD_ADDRESS + 0x1b3d0 + 1,
         [PINK_HEAVEN]  = LOAD_ADDRESS + 0x1b290 + 1,

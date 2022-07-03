@@ -9,11 +9,14 @@
 #include <assert.h>
 #include <psp2/ctrl.h>
 #include <psp2/kernel/threadmgr.h>
+#include <string.h>
 #include "control.h"
 #include "config.h"
 #include "main.h"
 #include "opengl.h"
 #include "game_info.h"
+
+#define DEAD_ZONE 20
 
 enum {
     AKEYCODE_DPAD_UP = 19,
@@ -30,12 +33,19 @@ enum {
     AKEYCODE_F3 = 133,
 };
 
+enum {
+    AXIS_X = 0,
+    AXIS_Y = 1,
+    AXIS_RX = 11,
+    AXIS_RY = 14,
+};
+
 typedef struct {
     uint32_t sce_button;
     int32_t android_button;
-} ButtonMapping;
+} button_mapping_t;
 
-static ButtonMapping mapping[] = {
+static button_mapping_t mapping[] = {
         {SCE_CTRL_CROSS,    AKEYCODE_X},
         {SCE_CTRL_CIRCLE,   AKEYCODE_Z},
         {SCE_CTRL_SQUARE,   AKEYCODE_S},
@@ -141,10 +151,30 @@ void submit_touch_event(touch_motion_t type, float x, float y) {
     event_buf_unlock();
 }
 
+void submit_joystick_event(float x, float y, float rx, float ry) {
+    event_buf_lock();
+    {
+        event_t *event = event_buf_allocate();
+        if (event != NULL) {
+            event->type = TYPE_JOYSTICK;
+            event->joystick_event.x = x;
+            event->joystick_event.y = y;
+            event->joystick_event.rx = rx;
+            event->joystick_event.ry = ry;
+            // debugPrintf("Trigger joystick event: x = %f, y = %f, rx = %f, ry = %f\n", x, y, rx, ry);
+        } else {
+            debugPrintf("[WARN] event buffer full! pending events will be dropped!\n");
+        }
+    }
+    event_buf_unlock();
+}
+
 _Noreturn int ctrl_thread(SceSize args, void *argp) {
     uint32_t old_buttons = 0, current_buttons = 0, down_buttons = 0, up_buttons = 0;
     float last_x[2] = {-1, -1};
     float last_y[2] = {-1, -1};
+    float last_pad[4] = {0, 0, 0, 0};
+    float cur_pad[4] = {0, 0, 0, 0};
 
     while (1) {
         // Touch event
@@ -175,29 +205,45 @@ _Noreturn int ctrl_thread(SceSize args, void *argp) {
         sceCtrlPeekBufferPositiveExt2(0, &pad, 1);
 
         old_buttons = current_buttons;
-
         current_buttons = pad.buttons;
-        // add left joystick mapping
-        if (pad.lx < 80) {
-            current_buttons |= SCE_CTRL_LEFT;
-        } else if (pad.lx > 170) {
-            current_buttons |= SCE_CTRL_RIGHT;
-        }
-        if (pad.ly < 80) {
-            current_buttons |= SCE_CTRL_UP;
-        } else if (pad.ly > 170) {
-            current_buttons |= SCE_CTRL_DOWN;
+
+        // for joystick
+        cur_pad[0] = pad.lx >= 128 - DEAD_ZONE && pad.lx <= 128 + DEAD_ZONE ? 0.0f : ((float) pad.lx - 128.0f) / 128.0f;
+        cur_pad[1] = pad.ly >= 128 - DEAD_ZONE && pad.ly <= 128 + DEAD_ZONE ? 0.0f : ((float) pad.ly - 128.0f) / 128.0f;
+        cur_pad[2] = pad.rx >= 128 - DEAD_ZONE && pad.rx <= 128 + DEAD_ZONE ? 0.0f : ((float) pad.rx - 128.0f) / 128.0f;
+        cur_pad[3] = pad.ry >= 128 - DEAD_ZONE && pad.ry <= 128 + DEAD_ZONE ? 0.0f : ((float) pad.ry - 128.0f) / 128.0f;
+
+        // add left joystick mapping if joystick not supported
+        if (!SUPPORT_JOYSTICK) {
+            if (cur_pad[0] <= -0.7) {
+                current_buttons |= SCE_CTRL_LEFT;
+            } else if (cur_pad[0] > 0.7) {
+                current_buttons |= SCE_CTRL_RIGHT;
+            }
+            if (cur_pad[1] <= -0.7) {
+                current_buttons |= SCE_CTRL_UP;
+            } else if (cur_pad[1] > 0.7) {
+                current_buttons |= SCE_CTRL_DOWN;
+            }
         }
 
         down_buttons = current_buttons & ~old_buttons;
         up_buttons = ~current_buttons & old_buttons;
 
-        for (int i = 0; i < sizeof(mapping) / sizeof(ButtonMapping); i++) {
+        for (int i = 0; i < sizeof(mapping) / sizeof(button_mapping_t); i++) {
             if (down_buttons & mapping[i].sce_button) {
                 submit_key_event(false, mapping[i].android_button);
             }
             if (up_buttons & mapping[i].sce_button) {
                 submit_key_event(true, mapping[i].android_button);
+            }
+        }
+
+        // Joystick event
+        if (SUPPORT_JOYSTICK) {
+            if (cur_pad[0] != last_pad[0] || cur_pad[1] != last_pad[1]) {
+                submit_joystick_event(cur_pad[0], cur_pad[1], cur_pad[2], cur_pad[3]);
+                memcpy(last_pad, cur_pad, sizeof(cur_pad));
             }
         }
     }
@@ -225,12 +271,27 @@ int process_control_event() {
 }
 
 int AInputEvent_getType(event_t *event) {
-    return event->type;
+    switch (event->type) {
+        case TYPE_KEY:
+            return 1;
+        case TYPE_TOUCH:
+        case TYPE_JOYSTICK:
+            return 2;
+        default:
+            return -1;
+    }
 }
 
 int AInputEvent_getSource(event_t* event) {
-    // TODO
-    return 0x3002;
+    switch (event->type) {
+        case TYPE_KEY:
+        case TYPE_TOUCH:
+            return 0x3002;
+        case TYPE_JOYSTICK:
+            return 0x1000411;
+        default:
+            return 0;
+    }
 }
 
 int AMotionEvent_getAction(event_t *event) {
@@ -268,7 +329,19 @@ sfp_float AMotionEvent_getY(event_t *event, size_t index) {
     return float2sfp(event->touch_event.y);
 }
 
-sfp_float AMotionEvent_getAxisValue(event_t* motion_event, int32_t axis, size_t pointer_index) {
-    // TODO
-    return 0;
+sfp_float AMotionEvent_getAxisValue(event_t* event, int32_t axis, size_t pointer_index) {
+    assert(pointer_index == 0);
+    assert(event->type == TYPE_JOYSTICK);
+    switch (axis) {
+        case AXIS_X:
+            return float2sfp(event->joystick_event.x);
+        case AXIS_Y:
+            return float2sfp(event->joystick_event.y);
+        case AXIS_RX:
+            return float2sfp(event->joystick_event.rx);
+        case AXIS_RY:
+            return float2sfp(event->joystick_event.ry);
+        default:
+            return 0;
+    }
 }

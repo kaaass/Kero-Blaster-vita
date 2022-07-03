@@ -8,6 +8,7 @@
 typedef enum {
     TYPE_KEY = 1,
     TYPE_TOUCH = 2,
+    TYPE_JOYSTICK = 3,
 } event_type_t;
 
 typedef enum {
@@ -29,6 +30,12 @@ typedef struct {
             float x;
             float y;
         } touch_event;
+        struct {
+            float x;
+            float y;
+            float rx;
+            float ry;
+        } joystick_event;
     };
 } event_t;
 
