@@ -147,3 +147,10 @@ EGLDisplay eglGetDisplay_hook(EGLNativeDisplayType display_id) {
 
     return egl_display;
 }
+
+EGLBoolean EGLAPIENTRY eglChooseConfig_hook(EGLDisplay dpy, const EGLint *attrib_list,
+                                       EGLConfig *configs, EGLint config_size,
+                                       EGLint *num_config) {
+    *num_config = 1;
+    return 1;
+}

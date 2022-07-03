@@ -30,6 +30,6 @@ int pxaAudioStream_open_hook(void *base, int channel, int sample_rate, int perf)
 
 extern "C" {
 void patch_audio() {
-    hook_addr(LOAD_ADDRESS + 0x19f20 + 1, (uintptr_t) &pxaAudioStream_open_hook);
+    hook_addr(LOAD_ADDRESS + 0x1b3d0 + 1, (uintptr_t) &pxaAudioStream_open_hook);
 }
 }

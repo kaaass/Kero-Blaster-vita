@@ -67,8 +67,24 @@ int debugPrintf(char *text, ...) {
     return 0;
 }
 
+void write_last_error_hook(char *fmt, ...) {
+    va_list list;
+    static char string[0x8000];
+
+    va_start(list, fmt);
+    vsprintf(string, fmt, list);
+    va_end(list);
+#if defined(DEBUG)
+    debugPrintf("[LastError]: %s\n", string);
+#else
+    printf("[LastError]: %s\n", string);
+#endif
+}
+
 void patch_game(void) {
     patch_audio();
+
+    hook_addr(LOAD_ADDRESS + 0xb24c4 + 0x1, (uintptr_t) &write_last_error_hook);
 }
 
 int check_kubridge(void) {

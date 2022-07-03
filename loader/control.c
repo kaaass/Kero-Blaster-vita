@@ -207,7 +207,7 @@ _Noreturn int ctrl_thread(SceSize args, void *argp) {
  */
 
 int process_control_event() {
-    int (*onInputEvent)(void *app, void *event) = (int (*)(void *, void *)) (LOAD_ADDRESS + 0x18028 + 1);
+    int (*onInputEvent)(void *app, void *event) = (int (*)(void *, void *)) (LOAD_ADDRESS + 0x18e74 + 1);
     int ret;
 
     event_buf_lock();
@@ -225,6 +225,11 @@ int process_control_event() {
 
 int AInputEvent_getType(event_t *event) {
     return event->type;
+}
+
+int AInputEvent_getSource(event_t* event) {
+    // TODO
+    return 0x3002;
 }
 
 int AMotionEvent_getAction(event_t *event) {
@@ -260,4 +265,9 @@ sfp_float AMotionEvent_getX(event_t *event, size_t index) {
 sfp_float AMotionEvent_getY(event_t *event, size_t index) {
     assert(index == 0);
     return float2sfp(event->touch_event.y);
+}
+
+sfp_float AMotionEvent_getAxisValue(event_t* motion_event, int32_t axis, size_t pointer_index) {
+    // TODO
+    return 0;
 }

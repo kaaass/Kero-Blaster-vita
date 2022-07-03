@@ -66,6 +66,8 @@ int process_control_event();
 
 int AInputEvent_getType(event_t *event);
 
+int AInputEvent_getSource(event_t* event);
+
 int AMotionEvent_getAction(event_t *event);
 
 int AKeyEvent_getKeyCode(event_t *event);
@@ -77,5 +79,7 @@ int AMotionEvent_getPointerId(event_t *event, size_t index);
 sfp_float AMotionEvent_getX(event_t *event, size_t index);
 
 sfp_float AMotionEvent_getY(event_t *event, size_t index);
+
+sfp_float AMotionEvent_getAxisValue(event_t* motion_event, int32_t axis, size_t pointer_index);
 
 #endif //KERO_BLASTER_VITA_CONTROL_H

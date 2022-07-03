@@ -68,9 +68,9 @@ extern void *_ZTISt12length_error();
 extern void *_ZTVSt12length_error();
 extern void *_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE6resizeEjc();
 extern void *_ZNSt6chrono3_V212steady_clock3nowEv(void *clock);
-
-bool *g_is_error = (bool *) (LOAD_ADDRESS + 0xd31e8);
-char **last_error = LOAD_ADDRESS + 0xd31ec;
+extern void *_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE6assignEPKc();
+extern void *_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE6appendEPKc();
+extern void *_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE6appendEPKcj();
 
 int ret0(void) {
     return 0;
@@ -82,16 +82,6 @@ int ret1(void) {
 
 size_t __strlen_chk(const char *s, size_t s_len) {
     return strlen(s);
-}
-
-void check_last_error() {
-    if (*g_is_error) {
-#if defined(DEBUG)
-        debugPrintf("[LastError]: %s\n", *last_error);
-#else
-        printf("[LastError]: %s\n", *last_error);
-#endif
-    }
 }
 
 void _ZNSt6__ndk16chrono12steady_clock3nowEv(uint64_t *clock) {
@@ -152,12 +142,10 @@ int __android_log_print(int prio, const char *tag, const char *fmt, ...) {
 
 #if defined(DEBUG)
     debugPrintf("[LOG] %s: %s\n", tag, string);
-    check_last_error();
 #else
     if (prio >= 4) {
         // only show INFO and upper in release mode
         printf("[LOG] %s: %s\n", tag, string);
-        check_last_error();
     }
 #endif
     return 0;
@@ -166,12 +154,10 @@ int __android_log_print(int prio, const char *tag, const char *fmt, ...) {
 int __android_log_write(int prio, const char *tag, const char *text) {
 #if defined(DEBUG)
     debugPrintf("[LOG] %s: %s\n", tag, text);
-    check_last_error();
 #else
     if (prio >= 4) {
         // only show INFO and upper in release mode
         printf("[LOG] %s: %s\n", tag, text);
-        check_last_error();
     }
 #endif
     return 0;
@@ -195,7 +181,7 @@ int ALooper_pollAll(int timeout, int *outFd, int *outEvents, void **outData) {
     // process event
     call_count++;
     if (call_count == 1) {
-        void (*onAppCmd)(void *app, int cmd) = (void (*)(void *, int)) (LOAD_ADDRESS + 0x17fb8 + 1);
+        void (*onAppCmd)(void *app, int cmd) = (void (*)(void *, int)) (LOAD_ADDRESS + 0x18df0 + 1);
         // trigger INIT_WINDOW
         *(uintptr_t *) (fake_activity.instance + 0x24) = 0x42424242;
         onAppCmd(fake_activity.instance, 1);
@@ -216,7 +202,7 @@ typedef struct {
 
 Asset *AAssetManager_open(void *mgr, char *filename, int mode) {
     char pathname[PATH_MAX];
-    if (mode != 3) {
+    if (mode != 3 && mode != 1) {
         debugPrintf("Unsupported asset open mode (%d)!\n", mode);
         return NULL;
     }
@@ -231,7 +217,11 @@ Asset *AAssetManager_open(void *mgr, char *filename, int mode) {
     Asset *result = malloc(sizeof(Asset));
     result->fp = fp;
     result->buf = NULL;
-    result->length = 0;
+    // Cache file length
+    fseek(result->fp, 0L, SEEK_END);
+    off_t len = ftell(result->fp);
+    fseek(result->fp, 0L, SEEK_SET);
+    result->length = len;
     return result;
 }
 
@@ -242,21 +232,28 @@ off_t AAsset_getLength(Asset *asset) {
 void *AAsset_getBuffer(Asset *asset) {
     if (asset->buf == NULL) {
         assert(asset->fp);
-        fseek(asset->fp, 0L, SEEK_END);
-        off_t len = ftell(asset->fp);
         fseek(asset->fp, 0L, SEEK_SET);
+        off_t len = asset->length;
         void *buf = malloc(len);
         fread(buf, len, 1, asset->fp);
         fclose(asset->fp);
         asset->fp = NULL;
         asset->buf = buf;
-        asset->length = len;
     }
     return asset->buf;
 }
 
+int AAsset_read(Asset* asset, void* buf, size_t count) {
+    return (int) fread(buf, 1, count, asset->fp);
+}
+
+off_t AAsset_seek(Asset* asset, off_t offset, int whence) {
+    return fseek(asset->fp, offset, whence);
+}
+
 void AAsset_close(Asset *asset) {
     if (asset->fp) {
+        debugPrintf("Close asset file: %p\n", asset->fp);
         fclose(asset->fp);
     }
     if (asset->buf) {
@@ -285,6 +282,8 @@ STUB_FUNC(dlsym)
 STUB_FUNC(dl_unwind_find_exidx)
 STUB_FUNC(_ZNKSt6__ndk120__vector_base_commonILb1EE20__throw_length_errorEv)
 STUB_FUNC(_ZNSt6__ndk119__shared_weak_count14__release_weakEv)
+STUB_FUNC(_ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEED2Ev)
+STUB_FUNC(_ZNSt6__ndk19to_stringEi)
 
 #define CRASH_STUB(name) int name() { \
                             printf("crash stub: '" #name "' unimplemented\n"); \
