@@ -79,6 +79,7 @@ cmake .. && make
 - Other existing open source Android vita ports projects
 - GrapheneCt for PVR_PSP2, which is the graphic backend in this project
 - frangarcj for porting OpenSLES
+- alula for helping me to solve the key configuration issue (#2)
 
 ## Progress
 
