@@ -22,6 +22,7 @@
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include <assert.h>
+#include <psp2/kernel/processmgr.h>
 
 #include "main.h"
 #include "jni.h"
