@@ -20,7 +20,7 @@
 uint64_t info_so_hash[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = 0x019745ff,
         [PINK_HEAVEN]  = 0x0db776df,
-        [PINK_HOUR]    = 0x0c24916c,
+        [PINK_HOUR]    = 0x0e849bef,
 };
 
 char *info_data_path[MAX_SUPPORT_GAME] = {
@@ -48,7 +48,7 @@ char *info_assets_path() {
 bool info_support_joystick[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = true,
         [PINK_HEAVEN]  = true,
-        [PINK_HOUR]    = false,
+        [PINK_HOUR]    = true,
 };
 
 char *info_game_version[MAX_SUPPORT_GAME] = {
@@ -58,43 +58,43 @@ char *info_game_version[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = "unknown",
 #endif
         [PINK_HEAVEN]  = "1.6.1",
-        [PINK_HOUR]    = "1.6.0",
+        [PINK_HOUR]    = "1.6.1",
 };
 
 uintptr_t address_pxaAudioStream_open[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = LOAD_ADDRESS + 0x1b3d0 + 1,
         [PINK_HEAVEN]  = LOAD_ADDRESS + 0x1b290 + 1,
-        [PINK_HOUR]    = LOAD_ADDRESS + 0x19e60 + 1,
+        [PINK_HOUR]    = LOAD_ADDRESS + 0x1b270 + 1,
 };
 
 uintptr_t address_onInputEvent[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = LOAD_ADDRESS + 0x18e74 + 1,
         [PINK_HEAVEN]  = LOAD_ADDRESS + 0x18d30 + 1,
-        [PINK_HOUR]    = LOAD_ADDRESS + 0x17f64 + 1,
+        [PINK_HOUR]    = LOAD_ADDRESS + 0x18d10 + 1,
 };
 
 uintptr_t address_onAppCmd[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = LOAD_ADDRESS + 0x18df0 + 1,
         [PINK_HEAVEN]  = LOAD_ADDRESS + 0x18cac + 1,
-        [PINK_HOUR]    = LOAD_ADDRESS + 0x17ef4 + 1,
+        [PINK_HOUR]    = LOAD_ADDRESS + 0x18c8c + 1,
 };
 
 uintptr_t address_write_last_error[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = LOAD_ADDRESS + 0xb24c4 + 0x1,
         [PINK_HEAVEN]  = LOAD_ADDRESS + 0xb1a74 + 0x1,
-        [PINK_HOUR]    = LOAD_ADDRESS + 0xb0324 + 0x1,
+        [PINK_HOUR]    = LOAD_ADDRESS + 0xb1a44 + 0x1,
 };
 
 uintptr_t address_mutex_lock[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = LOAD_ADDRESS + 0xb4bf8 + 0x1,
         [PINK_HEAVEN]  = LOAD_ADDRESS + 0xb41a8 + 0x1,
-        [PINK_HOUR]    = LOAD_ADDRESS + 0xb299c + 0x1,
+        [PINK_HOUR]    = LOAD_ADDRESS + 0xb4178 + 0x1,
 };
 
 uintptr_t address_mutex_unlock[MAX_SUPPORT_GAME] = {
         [KERO_BLASTER] = LOAD_ADDRESS + 0xb4c12 + 0x1,
         [PINK_HEAVEN]  = LOAD_ADDRESS + 0xb41c2 + 0x1,
-        [PINK_HOUR]    = LOAD_ADDRESS + 0xb29b6 + 0x1,
+        [PINK_HOUR]    = LOAD_ADDRESS + 0xb4192 + 0x1,
 };
 
 /*
