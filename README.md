@@ -35,7 +35,7 @@ In order to properly install the game, you'll have to follow these steps precise
   `ux0:data/kero`.
 - (Optional) If you want to install *Pink Hour* or *Pink Heaven*, following the steps above, 
   except save the `assets` folder and `libpxgame.so` file under a new path:
-  - for *Pink Hour v1.6.0*, save them to `ux0:data/kero/pink_hour`
+  - for *Pink Hour v1.6.1*, save them to `ux0:data/kero/pink_hour`
   - for *Pink Heaven v1.6.1*, save them to `ux0:data/kero/pink_heaven`
 - Install [Kero-Blaster.vpk](https://github.com/kaaass/Kero-Blaster-vita/releases) on your *PS Vita*.
 

@@ -29,7 +29,7 @@
 - 把文件 `lib/armeabi-v7a/libpxgame.so` 复制到 `ux0:data/kero` 下
 - (可选) 如果你还想安装 *粉红时光* 或 *粉红天堂*，就按照上述步骤把对应 APK 中的 `assets` 和 
   `libpxgame.so` 复制到：
-  - 对于 *粉红时光 v1.6.0*，复制到 `ux0:data/kero/pink_hour` 下
+  - 对于 *粉红时光 v1.6.1*，复制到 `ux0:data/kero/pink_hour` 下
   - 对于 *粉红天堂 v1.6.1*，复制到 `ux0:data/kero/pink_heaven` 下
 - 安装 [Kero-Blaster.vpk](https://github.com/kaaass/Kero-Blaster-vita/releases)
 
